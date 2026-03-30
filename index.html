@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>副業収益シミュレーター</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #0a0f1e;
+      color: #e8eaf6;
+      font-family: 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 480px;
+    }
+
+    /* ヘッダー */
+    .header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .header .badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #3b4fd8, #6c63ff);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+    }
+
+    .header h1 {
+      font-size: 22px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.01em;
+      line-height: 1.3;
+    }
+
+    .header p {
+      margin-top: 8px;
+      font-size: 13px;
+      color: #8892b0;
+    }
+
+    /* カード */
+    .card {
+      background: #111827;
+      border: 1px solid #1e2a45;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #6c7a9c;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    /* フォロワースライダー */
+    .follower-display {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .follower-number {
+      font-size: 52px;
+      font-weight: 900;
+      color: #fff;
+      line-height: 1;
+      letter-spacing: -0.03em;
+    }
+
+    .follower-label {
+      font-size: 13px;
+      color: #6c7a9c;
+      margin-top: 4px;
+    }
+
+    .slider-wrapper {
+      position: relative;
+      padding: 8px 0;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: #1e2a45;
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #3b4fd8, #6c63ff);
+      cursor: pointer;
+      box-shadow: 0 0 12px rgba(108, 99, 255, 0.6);
+      border: 2px solid #fff;
+      transition: box-shadow 0.2s;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      box-shadow: 0 0 20px rgba(108, 99, 255, 0.9);
+    }
+
+    .slider-range {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+      font-size: 11px;
+      color: #4a5568;
+    }
+
+    /* 収益モデル選択 */
+    .model-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .model-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      background: #0d1526;
+      border: 1.5px solid #1e2a45;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      user-select: none;
+    }
+
+    .model-item:hover {
+      border-color: #3b4fd8;
+      background: #131f38;
+    }
+
+    .model-item.active {
+      border-color: #6c63ff;
+      background: linear-gradient(135deg, #111827, #16204a);
+    }
+
+    .model-check {
+      width: 20px;
+      height: 20px;
+      border-radius: 6px;
+      border: 2px solid #2d3a5e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+
+    .model-item.active .model-check {
+      background: linear-gradient(135deg, #3b4fd8, #6c63ff);
+      border-color: transparent;
+    }
+
+    .model-check svg {
+      display: none;
+      width: 12px;
+      height: 12px;
+      stroke: #fff;
+      stroke-width: 2.5;
+      fill: none;
+    }
+
+    .model-item.active .model-check svg {
+      display: block;
+    }
+
+    .model-info {
+      flex: 1;
+    }
+
+    .model-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: #e8eaf6;
+    }
+
+    .model-desc {
+      font-size: 11px;
+      color: #6c7a9c;
+      margin-top: 2px;
+    }
+
+    .model-amount {
+      font-size: 13px;
+      font-weight: 700;
+      color: #6c63ff;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    /* 結果 */
+    .result-card {
+      background: linear-gradient(135deg, #111827, #0d1a38);
+      border: 1px solid #2a3a6e;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .result-card::before {
+      content: '';
+      position: absolute;
+      top: -60px;
+      right: -60px;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(108, 99, 255, 0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .result-breakdown {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 8px;
+      border-left: 3px solid transparent;
+      transition: opacity 0.3s;
+    }
+
+    .result-row.active {
+      border-left-color: #6c63ff;
+    }
+
+    .result-row.inactive {
+      opacity: 0.3;
+    }
+
+    .result-row-label {
+      font-size: 13px;
+      color: #8892b0;
+    }
+
+    .result-row-value {
+      font-size: 15px;
+      font-weight: 800;
+      color: #c5caf5;
+    }
+
+    .result-row.active .result-row-value {
+      color: #a0a8ff;
+    }
+
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #2a3a6e, transparent);
+      margin: 16px 0;
+    }
+
+    .total-section {
+      text-align: center;
+    }
+
+    .total-label {
+      font-size: 13px;
+      color: #6c7a9c;
+      margin-bottom: 8px;
+    }
+
+    .total-amount {
+      font-size: 56px;
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #818cf8, #c084fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      transition: all 0.3s;
+    }
+
+    .total-unit {
+      font-size: 16px;
+      color: #8892b0;
+      margin-top: 6px;
+    }
+
+    /* Xシェアボタン */
+    .share-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #1a1a2e, #16213e);
+      border: 1.5px solid #2a3a6e;
+      border-radius: 12px;
+      color: #e8eaf6;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      letter-spacing: 0.02em;
+    }
+
+    .share-btn:hover {
+      background: linear-gradient(135deg, #1e2a50, #1a2845);
+      border-color: #4a5a9e;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 20px rgba(108, 99, 255, 0.2);
+    }
+
+    .share-btn svg {
+      width: 18px;
+      height: 18px;
+      fill: #fff;
+    }
+
+    /* フッター */
+    .footer {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 11px;
+      color: #2d3a5e;
+    }
+
+    /* アニメーション */
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.6; }
+      100% { opacity: 1; }
+    }
+
+    .updating {
+      animation: pulse 0.3s ease;
+    }
+
+    /* スマホ最適化 */
+    @media (max-width: 400px) {
+      .follower-number { font-size: 42px; }
+      .total-amount { font-size: 44px; }
+      .card { padding: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- ヘッダー -->
+    <div class="header">
+      <div class="badge">Simulator v1</div>
+      <h1>副業収益シミュレーター</h1>
+      <p>フォロワー数から月収を試算してみよう</p>
+    </div>
+
+    <!-- フォロワー数 -->
+    <div class="card">
+      <div class="card-title">フォロワー数</div>
+      <div class="follower-display">
+        <div class="follower-number" id="followerDisplay">1,000</div>
+        <div class="follower-label">人</div>
+      </div>
+      <div class="slider-wrapper">
+        <input
+          type="range"
+          id="followerSlider"
+          min="100"
+          max="10000"
+          step="100"
+          value="1000"
+        />
+        <div class="slider-range">
+          <span>100人</span>
+          <span>10,000人</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 収益モデル選択 -->
+    <div class="card">
+      <div class="card-title">収益モデルを選択</div>
+      <div class="model-list">
+
+        <div class="model-item active" data-model="note">
+          <div class="model-check">
+            <svg viewBox="0 0 12 12"><polyline points="1.5,6 5,9.5 10.5,2.5"/></svg>
+          </div>
+          <div class="model-info">
+            <div class="model-name">note 有料記事</div>
+            <div class="model-desc">フォロワーの1% × 1,000円</div>
+          </div>
+          <div class="model-amount" id="note-amount">¥10,000</div>
+        </div>
+
+        <div class="model-item active" data-model="consul">
+          <div class="model-check">
+            <svg viewBox="0 0 12 12"><polyline points="1.5,6 5,9.5 10.5,2.5"/></svg>
+          </div>
+          <div class="model-info">
+            <div class="model-name">匿名コンサル</div>
+            <div class="model-desc">フォロワーの0.1% × 15,000円</div>
+          </div>
+          <div class="model-amount" id="consul-amount">¥15,000</div>
+        </div>
+
+        <div class="model-item active" data-model="tool">
+          <div class="model-check">
+            <svg viewBox="0 0 12 12"><polyline points="1.5,6 5,9.5 10.5,2.5"/></svg>
+          </div>
+          <div class="model-info">
+            <div class="model-name">ツール販売</div>
+            <div class="model-desc">フォロワーの0.5% × 500円</div>
+          </div>
+          <div class="model-amount" id="tool-amount">¥2,500</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 結果 -->
+    <div class="result-card">
+      <div class="result-breakdown">
+        <div class="result-row active" id="row-note">
+          <span class="result-row-label">note 有料記事</span>
+          <span class="result-row-value" id="result-note">¥10,000</span>
+        </div>
+        <div class="result-row active" id="row-consul">
+          <span class="result-row-label">匿名コンサル</span>
+          <span class="result-row-value" id="result-consul">¥15,000</span>
+        </div>
+        <div class="result-row active" id="row-tool">
+          <span class="result-row-label">ツール販売</span>
+          <span class="result-row-value" id="result-tool">¥2,500</span>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="total-section">
+        <div class="total-label">合計 月収予測</div>
+        <div class="total-amount" id="totalAmount">¥27,500</div>
+        <div class="total-unit">/ 月</div>
+      </div>
+    </div>
+
+    <!-- Xシェアボタン -->
+    <a class="share-btn" id="shareBtn" href="#" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+      </svg>
+      Xにシェアする
+    </a>
+
+    <div class="footer">※ 本シミュレーターは参考値です。実際の収益を保証するものではありません。</div>
+
+  </div>
+
+  <script>
+    // --- 状態管理 ---
+    const state = {
+      followers: 1000,
+      models: {
+        note: true,
+        consul: true,
+        tool: true,
+      }
+    };
+
+    // --- 計算ロジック ---
+    function calcNote(f)   { return Math.floor(f * 0.01 * 1000); }
+    function calcConsul(f) { return Math.floor(f * 0.001 * 15000); }
+    function calcTool(f)   { return Math.floor(f * 0.005 * 500); }
+
+    function formatYen(n) {
+      return '¥' + n.toLocaleString('ja-JP');
+    }
+
+    // --- UI更新 ---
+    function update() {
+      const f = state.followers;
+
+      const note   = calcNote(f);
+      const consul = calcConsul(f);
+      const tool   = calcTool(f);
+
+      // フォロワー表示
+      document.getElementById('followerDisplay').textContent = f.toLocaleString('ja-JP');
+
+      // 各モデルの金額
+      document.getElementById('note-amount').textContent   = formatYen(note);
+      document.getElementById('consul-amount').textContent = formatYen(consul);
+      document.getElementById('tool-amount').textContent   = formatYen(tool);
+
+      // 結果の行
+      const updateRow = (id, resultId, val, active) => {
+        const row = document.getElementById('row-' + id);
+        const res = document.getElementById('result-' + id);
+        row.classList.toggle('active', active);
+        row.classList.toggle('inactive', !active);
+        res.textContent = formatYen(val);
+      };
+
+      updateRow('note',   'result-note',   note,   state.models.note);
+      updateRow('consul', 'result-consul', consul, state.models.consul);
+      updateRow('tool',   'result-tool',   tool,   state.models.tool);
+
+      // 合計
+      let total = 0;
+      if (state.models.note)   total += note;
+      if (state.models.consul) total += consul;
+      if (state.models.tool)   total += tool;
+
+      const totalEl = document.getElementById('totalAmount');
+      totalEl.textContent = formatYen(total);
+      totalEl.classList.add('updating');
+      setTimeout(() => totalEl.classList.remove('updating'), 300);
+
+      // Xシェアテキスト
+      const activeModels = [];
+      if (state.models.note)   activeModels.push(`note: ${formatYen(note)}`);
+      if (state.models.consul) activeModels.push(`匿名コンサル: ${formatYen(consul)}`);
+      if (state.models.tool)   activeModels.push(`ツール販売: ${formatYen(tool)}`);
+
+      const tweetText = [
+        `フォロワー${f.toLocaleString()}人で副業月収${formatYen(total)}の試算が出た🔥`,
+        '',
+        activeModels.join(' / '),
+        '',
+        '副業収益シミュレーターで自分の数字を確認 👇',
+        '#副業 #X副業 #note収益化'
+      ].join('\n');
+
+      document.getElementById('shareBtn').href =
+        'https://twitter.com/intent/tweet?text=' + encodeURIComponent(tweetText);
+    }
+
+    // --- イベント ---
+
+    // スライダー
+    const slider = document.getElementById('followerSlider');
+    slider.addEventListener('input', (e) => {
+      state.followers = parseInt(e.target.value, 10);
+      update();
+    });
+
+    // モデル選択トグル
+    document.querySelectorAll('.model-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const model = item.dataset.model;
+        state.models[model] = !state.models[model];
+        item.classList.toggle('active', state.models[model]);
+        update();
+      });
+    });
+
+    // 初期描画
+    update();
+  </script>
+</body>
+</html>

@@ -3,13 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>副業収益シミュレーター</title>
+  <title>副業タイプ診断 × 収益シミュレーター</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       background: #0a0f1e;
@@ -17,9 +13,9 @@
       font-family: 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
       min-height: 100vh;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
-      padding: 20px;
+      padding: 24px 16px 48px;
     }
 
     .container {
@@ -27,13 +23,12 @@
       max-width: 480px;
     }
 
-    /* ヘッダー */
+    /* ============ 共通 ============ */
     .header {
       text-align: center;
       margin-bottom: 32px;
     }
-
-    .header .badge {
+    .badge {
       display: inline-block;
       background: linear-gradient(135deg, #3b4fd8, #6c63ff);
       color: #fff;
@@ -45,7 +40,6 @@
       margin-bottom: 12px;
       text-transform: uppercase;
     }
-
     .header h1 {
       font-size: 22px;
       font-weight: 800;
@@ -53,14 +47,12 @@
       letter-spacing: -0.01em;
       line-height: 1.3;
     }
-
     .header p {
       margin-top: 8px;
       font-size: 13px;
       color: #8892b0;
     }
 
-    /* カード */
     .card {
       background: #111827;
       border: 1px solid #1e2a45;
@@ -68,7 +60,6 @@
       padding: 24px;
       margin-bottom: 16px;
     }
-
     .card-title {
       font-size: 13px;
       font-weight: 700;
@@ -78,250 +69,308 @@
       margin-bottom: 16px;
     }
 
-    /* フォロワースライダー */
-    .follower-display {
-      text-align: center;
-      margin-bottom: 20px;
-    }
+    /* ============ 診断画面 ============ */
+    #diagScreen { display: block; }
+    #resultScreen { display: none; }
+    #simScreen { display: none; }
 
-    .follower-number {
-      font-size: 52px;
-      font-weight: 900;
-      color: #fff;
-      line-height: 1;
-      letter-spacing: -0.03em;
+    /* プログレスバー */
+    .progress-wrap {
+      margin-bottom: 28px;
     }
-
-    .follower-label {
-      font-size: 13px;
-      color: #6c7a9c;
-      margin-top: 4px;
-    }
-
-    .slider-wrapper {
-      position: relative;
-      padding: 8px 0;
-    }
-
-    input[type="range"] {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 100%;
-      height: 6px;
-      border-radius: 3px;
-      background: #1e2a45;
-      outline: none;
-      cursor: pointer;
-    }
-
-    input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #3b4fd8, #6c63ff);
-      cursor: pointer;
-      box-shadow: 0 0 12px rgba(108, 99, 255, 0.6);
-      border: 2px solid #fff;
-      transition: box-shadow 0.2s;
-    }
-
-    input[type="range"]::-webkit-slider-thumb:hover {
-      box-shadow: 0 0 20px rgba(108, 99, 255, 0.9);
-    }
-
-    .slider-range {
+    .progress-label {
       display: flex;
       justify-content: space-between;
-      margin-top: 8px;
-      font-size: 11px;
-      color: #4a5568;
+      font-size: 12px;
+      color: #6c7a9c;
+      margin-bottom: 8px;
+    }
+    .progress-bar {
+      height: 4px;
+      background: #1e2a45;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #3b4fd8, #6c63ff);
+      border-radius: 2px;
+      transition: width 0.4s ease;
     }
 
-    /* 収益モデル選択 */
-    .model-list {
+    /* 質問カード */
+    .q-card {
+      background: #111827;
+      border: 1px solid #1e2a45;
+      border-radius: 16px;
+      padding: 28px 24px 24px;
+      margin-bottom: 16px;
+      min-height: 220px;
+      position: relative;
+      overflow: hidden;
+    }
+    .q-card::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 180px; height: 180px;
+      background: radial-gradient(circle, rgba(108,99,255,0.10) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .q-number {
+      font-size: 11px;
+      font-weight: 700;
+      color: #6c63ff;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .q-text {
+      font-size: 18px;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+    .choices {
       display: flex;
       flex-direction: column;
       gap: 10px;
     }
-
-    .model-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 14px 16px;
+    .choice-btn {
+      display: block;
+      width: 100%;
+      padding: 14px 18px;
       background: #0d1526;
       border: 1.5px solid #1e2a45;
       border-radius: 12px;
+      color: #e8eaf6;
+      font-size: 15px;
+      font-weight: 600;
       cursor: pointer;
-      transition: border-color 0.2s, background 0.2s;
-      user-select: none;
+      text-align: left;
+      transition: border-color 0.2s, background 0.2s, transform 0.15s;
+      letter-spacing: 0.01em;
     }
-
-    .model-item:hover {
+    .choice-btn:hover {
       border-color: #3b4fd8;
       background: #131f38;
+      transform: translateX(3px);
     }
-
-    .model-item.active {
+    .choice-btn.selected {
       border-color: #6c63ff;
       background: linear-gradient(135deg, #111827, #16204a);
     }
-
-    .model-check {
-      width: 20px;
-      height: 20px;
-      border-radius: 6px;
-      border: 2px solid #2d3a5e;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      transition: all 0.2s;
+    .choice-btn .choice-arrow {
+      float: right;
+      color: #6c63ff;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .choice-btn:hover .choice-arrow,
+    .choice-btn.selected .choice-arrow {
+      opacity: 1;
     }
 
-    .model-item.active .model-check {
-      background: linear-gradient(135deg, #3b4fd8, #6c63ff);
-      border-color: transparent;
-    }
-
-    .model-check svg {
+    /* チラ見せバナー */
+    .sneak-peek {
+      background: linear-gradient(135deg, #16204a, #1a1040);
+      border: 1px solid #3b4fd8;
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin-bottom: 16px;
       display: none;
-      width: 12px;
-      height: 12px;
-      stroke: #fff;
-      stroke-width: 2.5;
-      fill: none;
+      animation: fadeSlideIn 0.4s ease;
+    }
+    .sneak-peek.show { display: block; }
+    .sneak-label {
+      font-size: 11px;
+      color: #6c63ff;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .sneak-text {
+      font-size: 14px;
+      color: #c5caf5;
+      font-weight: 600;
     }
 
-    .model-item.active .model-check svg {
+    /* ============ 結果画面 ============ */
+    .result-hero {
+      background: linear-gradient(135deg, #111827, #0d1a38);
+      border: 1px solid #2a3a6e;
+      border-radius: 20px;
+      padding: 32px 24px;
+      margin-bottom: 16px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .result-hero::before {
+      content: '';
+      position: absolute;
+      top: -80px; right: -80px;
+      width: 250px; height: 250px;
+      background: radial-gradient(circle, rgba(108,99,255,0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .result-hero::after {
+      content: '';
+      position: absolute;
+      bottom: -60px; left: -60px;
+      width: 200px; height: 200px;
+      background: radial-gradient(circle, rgba(192,84,252,0.1) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .result-emoji {
+      font-size: 56px;
+      line-height: 1;
+      margin-bottom: 10px;
       display: block;
     }
-
-    .model-info {
-      flex: 1;
+    .result-type-name {
+      font-size: 26px;
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+    .result-type-sub {
+      font-size: 13px;
+      color: #8892b0;
+      margin-bottom: 16px;
+    }
+    .result-desc {
+      font-size: 14px;
+      color: #c5caf5;
+      line-height: 1.75;
+      text-align: left;
+      background: rgba(255,255,255,0.04);
+      border-radius: 10px;
+      padding: 14px 16px;
     }
 
-    .model-name {
+    /* TOP3 */
+    .top3-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+    .top3-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: #0d1526;
+      border: 1px solid #1e2a45;
+      border-radius: 10px;
+    }
+    .top3-rank {
+      font-size: 18px;
+      font-weight: 900;
+      color: #6c63ff;
+      min-width: 24px;
+    }
+    .top3-name {
       font-size: 14px;
       font-weight: 700;
       color: #e8eaf6;
     }
 
-    .model-desc {
-      font-size: 11px;
-      color: #6c7a9c;
-      margin-top: 2px;
-    }
-
-    .model-amount {
-      font-size: 13px;
-      font-weight: 700;
-      color: #6c63ff;
-      text-align: right;
-      white-space: nowrap;
-    }
-
-    /* 結果 */
-    .result-card {
-      background: linear-gradient(135deg, #111827, #0d1a38);
-      border: 1px solid #2a3a6e;
-      border-radius: 16px;
-      padding: 24px;
-      margin-bottom: 16px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .result-card::before {
-      content: '';
-      position: absolute;
-      top: -60px;
-      right: -60px;
-      width: 200px;
-      height: 200px;
-      background: radial-gradient(circle, rgba(108, 99, 255, 0.12) 0%, transparent 70%);
-      pointer-events: none;
-    }
-
-    .result-breakdown {
+    /* 月収レンジ */
+    .income-table {
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      margin-bottom: 20px;
+      gap: 8px;
     }
-
-    .result-row {
+    .income-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 10px 14px;
-      background: rgba(255,255,255,0.03);
-      border-radius: 8px;
-      border-left: 3px solid transparent;
-      transition: opacity 0.3s;
+      padding: 12px 16px;
+      background: #0d1526;
+      border: 1px solid #1e2a45;
+      border-radius: 10px;
     }
-
-    .result-row.active {
-      border-left-color: #6c63ff;
+    .income-row.highlight {
+      border-color: #6c63ff;
+      background: linear-gradient(135deg, #111827, #16204a);
     }
-
-    .result-row.inactive {
-      opacity: 0.3;
-    }
-
-    .result-row-label {
+    .income-time {
       font-size: 13px;
       color: #8892b0;
     }
-
-    .result-row-value {
+    .income-range {
       font-size: 15px;
       font-weight: 800;
-      color: #c5caf5;
-    }
-
-    .result-row.active .result-row-value {
       color: #a0a8ff;
     }
 
-    .divider {
-      height: 1px;
-      background: linear-gradient(90deg, transparent, #2a3a6e, transparent);
-      margin: 16px 0;
+    /* ファーストアクション */
+    .action-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
     }
-
-    .total-section {
-      text-align: center;
+    .action-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 16px;
+      background: #0d1526;
+      border: 1px solid #1e2a45;
+      border-radius: 10px;
     }
-
-    .total-label {
-      font-size: 13px;
-      color: #6c7a9c;
-      margin-bottom: 8px;
-    }
-
-    .total-amount {
-      font-size: 56px;
+    .action-num {
+      flex-shrink: 0;
+      width: 22px;
+      height: 22px;
+      background: linear-gradient(135deg, #3b4fd8, #6c63ff);
+      border-radius: 50%;
+      font-size: 11px;
       font-weight: 900;
-      line-height: 1;
-      letter-spacing: -0.03em;
-      background: linear-gradient(135deg, #818cf8, #c084fc);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      transition: all 0.3s;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1px;
+    }
+    .action-text {
+      font-size: 14px;
+      color: #c5caf5;
+      line-height: 1.6;
     }
 
-    .total-unit {
+    /* ボタン群 */
+    .btn-primary {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 18px;
+      background: linear-gradient(135deg, #3b4fd8, #6c63ff);
+      border: none;
+      border-radius: 14px;
+      color: #fff;
       font-size: 16px;
-      color: #8892b0;
-      margin-top: 6px;
+      font-weight: 800;
+      cursor: pointer;
+      letter-spacing: 0.02em;
+      transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+      text-decoration: none;
+      margin-bottom: 10px;
+    }
+    .btn-primary:hover {
+      opacity: 0.9;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(108,99,255,0.4);
     }
 
-    /* Xシェアボタン */
-    .share-btn {
+    .btn-secondary {
       display: flex;
       align-items: center;
       justify-content: center;
@@ -335,25 +384,178 @@
       font-size: 14px;
       font-weight: 700;
       cursor: pointer;
-      transition: all 0.2s;
       text-decoration: none;
       letter-spacing: 0.02em;
+      transition: all 0.2s;
+      margin-bottom: 10px;
     }
-
-    .share-btn:hover {
-      background: linear-gradient(135deg, #1e2a50, #1a2845);
+    .btn-secondary:hover {
       border-color: #4a5a9e;
       transform: translateY(-1px);
-      box-shadow: 0 4px 20px rgba(108, 99, 255, 0.2);
+      box-shadow: 0 4px 20px rgba(108,99,255,0.2);
     }
-
-    .share-btn svg {
-      width: 18px;
-      height: 18px;
+    .btn-secondary svg {
+      width: 18px; height: 18px;
       fill: #fff;
     }
 
-    /* フッター */
+    .btn-ghost {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      padding: 14px;
+      background: transparent;
+      border: 1.5px solid #1e2a45;
+      border-radius: 12px;
+      color: #6c7a9c;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 10px;
+    }
+    .btn-ghost:hover {
+      border-color: #2a3a6e;
+      color: #8892b0;
+    }
+
+    /* ============ シミュレーター画面 ============ */
+    .follower-display {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .follower-number {
+      font-size: 52px;
+      font-weight: 900;
+      color: #fff;
+      line-height: 1;
+      letter-spacing: -0.03em;
+    }
+    .follower-label {
+      font-size: 13px;
+      color: #6c7a9c;
+      margin-top: 4px;
+    }
+    .slider-wrapper {
+      position: relative;
+      padding: 8px 0;
+    }
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: #1e2a45;
+      outline: none;
+      cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #3b4fd8, #6c63ff);
+      cursor: pointer;
+      box-shadow: 0 0 12px rgba(108,99,255,0.6);
+      border: 2px solid #fff;
+      transition: box-shadow 0.2s;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover {
+      box-shadow: 0 0 20px rgba(108,99,255,0.9);
+    }
+    .slider-range {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+      font-size: 11px;
+      color: #4a5568;
+    }
+
+    .model-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .model-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      background: #0d1526;
+      border: 1.5px solid #1e2a45;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      user-select: none;
+    }
+    .model-item:hover { border-color: #3b4fd8; background: #131f38; }
+    .model-item.active { border-color: #6c63ff; background: linear-gradient(135deg, #111827, #16204a); }
+    .model-check {
+      width: 20px; height: 20px;
+      border-radius: 6px;
+      border: 2px solid #2d3a5e;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+    .model-item.active .model-check {
+      background: linear-gradient(135deg, #3b4fd8, #6c63ff);
+      border-color: transparent;
+    }
+    .model-check svg { display: none; width: 12px; height: 12px; stroke: #fff; stroke-width: 2.5; fill: none; }
+    .model-item.active .model-check svg { display: block; }
+    .model-info { flex: 1; }
+    .model-name { font-size: 14px; font-weight: 700; color: #e8eaf6; }
+    .model-desc { font-size: 11px; color: #6c7a9c; margin-top: 2px; }
+    .model-amount { font-size: 13px; font-weight: 700; color: #6c63ff; text-align: right; white-space: nowrap; }
+
+    .result-card {
+      background: linear-gradient(135deg, #111827, #0d1a38);
+      border: 1px solid #2a3a6e;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+    .result-card::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 200px; height: 200px;
+      background: radial-gradient(circle, rgba(108,99,255,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .result-breakdown { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+    .result-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 14px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 8px;
+      border-left: 3px solid transparent;
+      transition: opacity 0.3s;
+    }
+    .result-row.active { border-left-color: #6c63ff; }
+    .result-row.inactive { opacity: 0.3; }
+    .result-row-label { font-size: 13px; color: #8892b0; }
+    .result-row-value { font-size: 15px; font-weight: 800; color: #c5caf5; }
+    .result-row.active .result-row-value { color: #a0a8ff; }
+    .divider { height: 1px; background: linear-gradient(90deg, transparent, #2a3a6e, transparent); margin: 16px 0; }
+    .total-section { text-align: center; }
+    .total-label { font-size: 13px; color: #6c7a9c; margin-bottom: 8px; }
+    .total-amount {
+      font-size: 56px; font-weight: 900; line-height: 1; letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #818cf8, #c084fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      transition: all 0.3s;
+    }
+    .total-unit { font-size: 16px; color: #8892b0; margin-top: 6px; }
+
     .footer {
       text-align: center;
       margin-top: 20px;
@@ -361,36 +563,114 @@
       color: #2d3a5e;
     }
 
-    /* アニメーション */
-    @keyframes pulse {
-      0% { opacity: 1; }
-      50% { opacity: 0.6; }
-      100% { opacity: 1; }
-    }
+    /* ============ アニメーション ============ */
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+    @keyframes fadeSlideIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
 
-    .updating {
-      animation: pulse 0.3s ease;
-    }
+    .updating { animation: pulse 0.3s ease; }
+    .screen-enter { animation: fadeSlideIn 0.4s ease; }
 
-    /* スマホ最適化 */
+    /* ============ スマホ最適化 ============ */
     @media (max-width: 400px) {
       .follower-number { font-size: 42px; }
       .total-amount { font-size: 44px; }
       .card { padding: 18px; }
+      .q-text { font-size: 16px; }
+      .result-emoji { font-size: 44px; }
+      .result-type-name { font-size: 22px; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
+<div class="container">
 
-    <!-- ヘッダー -->
-    <div class="header">
-      <div class="badge">Simulator v1</div>
-      <h1>副業収益シミュレーター</h1>
-      <p>フォロワー数から月収を試算してみよう</p>
+  <!-- ============ ヘッダー ============ -->
+  <div class="header">
+    <div class="badge" id="headerBadge">Diagnosis v2</div>
+    <h1 id="headerTitle">副業タイプ診断</h1>
+    <p id="headerSub">7問に答えてあなたの副業タイプを発見しよう</p>
+  </div>
+
+  <!-- ============ 診断画面 ============ -->
+  <div id="diagScreen">
+
+    <!-- プログレスバー -->
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span id="progressText">1 / 7</span>
+        <span id="progressPct">14%</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill" style="width:14%"></div>
+      </div>
     </div>
 
-    <!-- フォロワー数 -->
+    <!-- チラ見せ -->
+    <div class="sneak-peek" id="sneakPeek">
+      <div class="sneak-label">あなたの方向性（中間予測）</div>
+      <div class="sneak-text" id="sneakText"></div>
+    </div>
+
+    <!-- 質問カード -->
+    <div class="q-card">
+      <div class="q-number" id="qNumber">Q1</div>
+      <div class="q-text" id="qText"></div>
+      <div class="choices" id="choicesEl"></div>
+    </div>
+
+  </div>
+
+  <!-- ============ 結果画面 ============ -->
+  <div id="resultScreen">
+
+    <!-- ヒーロー -->
+    <div class="result-hero screen-enter">
+      <span class="result-emoji" id="resEmoji"></span>
+      <div class="result-type-name" id="resTypeName"></div>
+      <div class="result-type-sub" id="resTypeSub"></div>
+      <div class="result-desc" id="resDesc"></div>
+    </div>
+
+    <!-- TOP3副業 -->
+    <div class="card">
+      <div class="card-title">向いている副業 TOP3</div>
+      <div class="top3-list" id="resTop3"></div>
+    </div>
+
+    <!-- 月収レンジ -->
+    <div class="card">
+      <div class="card-title">月収ポテンシャル（時間別）</div>
+      <div class="income-table" id="resIncome"></div>
+    </div>
+
+    <!-- ファーストアクション -->
+    <div class="card">
+      <div class="card-title">今週やること</div>
+      <div class="action-list" id="resActions"></div>
+    </div>
+
+    <!-- CTA -->
+    <button class="btn-primary" id="simBtn">
+      詳しく試算する →
+    </button>
+
+    <a class="btn-secondary" id="shareBtn" href="#" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+      </svg>
+      Xにシェアする
+    </a>
+
+    <button class="btn-ghost" id="retryBtn">
+      もう一度診断する
+    </button>
+
+  </div>
+
+  <!-- ============ シミュレーター画面 ============ -->
+  <div id="simScreen">
+
     <div class="card">
       <div class="card-title">フォロワー数</div>
       <div class="follower-display">
@@ -398,14 +678,7 @@
         <div class="follower-label">人</div>
       </div>
       <div class="slider-wrapper">
-        <input
-          type="range"
-          id="followerSlider"
-          min="100"
-          max="10000"
-          step="100"
-          value="1000"
-        />
+        <input type="range" id="followerSlider" min="100" max="10000" step="100" value="1000" />
         <div class="slider-range">
           <span>100人</span>
           <span>10,000人</span>
@@ -413,7 +686,6 @@
       </div>
     </div>
 
-    <!-- 収益モデル選択 -->
     <div class="card">
       <div class="card-title">収益モデルを選択</div>
       <div class="model-list">
@@ -454,7 +726,6 @@
       </div>
     </div>
 
-    <!-- 結果 -->
     <div class="result-card">
       <div class="result-breakdown">
         <div class="result-row active" id="row-note">
@@ -478,118 +749,505 @@
       </div>
     </div>
 
-    <!-- Xシェアボタン -->
-    <a class="share-btn" id="shareBtn" href="#" target="_blank" rel="noopener">
+    <a class="btn-secondary" id="simShareBtn" href="#" target="_blank" rel="noopener">
       <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
         <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
       </svg>
       Xにシェアする
     </a>
 
-    <div class="footer">※ 本シミュレーターは参考値です。実際の収益を保証するものではありません。</div>
+    <button class="btn-ghost" id="backToResultBtn">
+      ← 診断結果に戻る
+    </button>
 
+    <div class="footer">※ 本シミュレーターは参考値です。実際の収益を保証するものではありません。</div>
   </div>
 
-  <script>
-    // --- 状態管理 ---
-    const state = {
-      followers: 1000,
-      models: {
-        note: true,
-        consul: true,
-        tool: true,
-      }
-    };
+</div>
 
-    // --- 計算ロジック ---
-    function calcNote(f)   { return Math.floor(f * 0.01 * 1000); }
-    function calcConsul(f) { return Math.floor(f * 0.001 * 15000); }
-    function calcTool(f)   { return Math.floor(f * 0.005 * 500); }
+<script>
+// ============================================================
+// データ定義
+// ============================================================
 
-    function formatYen(n) {
-      return '¥' + n.toLocaleString('ja-JP');
-    }
+const QUESTIONS = [
+  {
+    id: 'q1',
+    text: '自分の考えや経験を、発信するのは得意ですか？',
+    choices: ['得意 / 発信が好き', '苦手 / あまりしない'],
+    values: ['発信好き', '発信苦手']
+  },
+  {
+    id: 'q2',
+    text: '一人でコツコツ作業するのと、人と直接話すのどちらが好き？',
+    choices: ['一人でコツコツ派', '人と話す・教える派'],
+    values: ['一人派', '人派']
+  },
+  {
+    id: 'q3',
+    text: '新しいツールや仕組みを試すのは好き？',
+    choices: ['大好き！すぐ試す', 'あまり好きじゃない'],
+    values: ['ツール好き', 'ツール苦手']
+  },
+  {
+    id: 'q4',
+    text: '副業に使える時間は週どのくらい？',
+    choices: ['3時間以下', '3〜10時間', '10時間以上'],
+    values: ['時間少', '時間中', '時間多']
+  },
+  {
+    id: 'q5',
+    text: '自分の「経験・知識」を売ることに抵抗ある？',
+    choices: ['ない / むしろ積極的', 'ある / 少し気が引ける'],
+    values: ['知識販売OK', '知識販売NG']
+  },
+  {
+    id: 'q6',
+    text: '継続的な作業と、スポットの作業どちらが向いてる？',
+    choices: ['毎日コツコツ継続派', 'まとめてスポット派'],
+    values: ['継続派', 'スポット派']
+  },
+  {
+    id: 'q7',
+    text: '副業で最初に求めるものは？',
+    choices: ['早く稼ぎたい！スピード重視', 'じっくり積み上げたい'],
+    values: ['速攻派', '積み上げ派']
+  }
+];
 
-    // --- UI更新 ---
-    function update() {
-      const f = state.followers;
+// 6タイプ定義
+const TYPES = {
+  発信者型: {
+    emoji: '🔥',
+    name: '発信者型',
+    sub: 'Influencer / Creator',
+    desc: '発信力があり、自分の経験・知識・思考を言語化できる強みを持つタイプ。SNSやnoteで独自の視点を発信することで、継続的な読者・フォロワーを獲得できる。情報発信そのものがマネタイズの入口になる。',
+    top3: ['note有料記事・マガジン', 'X（Twitter）有料コンテンツ', 'Substack・メルマガ'],
+    income: {
+      少: '月1〜3万円',
+      中: '月3〜10万円',
+      多: '月10〜30万円'
+    },
+    actions: [
+      'Xで「自分の専門テーマ × AI活用」の投稿を3本書く',
+      'noteに無料記事を1本公開してフォロワーの反応を見る',
+      '有料記事のネタを5個リストアップする'
+    ]
+  },
+  職人型: {
+    emoji: '🛠',
+    name: '職人型',
+    sub: 'Builder / Maker',
+    desc: 'ツールや仕組みを作ることが得意なタイプ。AIや自動化を活用して「使えるもの」を作り、それを販売・配布できる。一度作ったものが繰り返し収益を生む「ストック型」の副業が向いている。',
+    top3: ['Notionテンプレート販売', 'AIプロンプト・ツール販売', 'SaaS・Webアプリ開発'],
+    income: {
+      少: '月0.5〜2万円',
+      中: '月2〜8万円',
+      多: '月8〜20万円'
+    },
+    actions: [
+      'Notionで自分が使っている管理テンプレートを整える',
+      'BASEまたはGumroadでショップを開設する',
+      '1つのテンプレートを990円で出品してみる'
+    ]
+  },
+  コンサル型: {
+    emoji: '🎯',
+    name: 'コンサル型',
+    sub: 'Advisor / Consultant',
+    desc: '人の悩みを聞いて解決策を提示するのが得意なタイプ。少ない時間でも高単価を狙えるのが特徴。スポット相談や匿名コンサルで「1回の対話」に価値を乗せることができる。',
+    top3: ['ストアカ・スポットコンサル', '匿名相談（ペイター・coconala）', 'X DMでの個別相談'],
+    income: {
+      少: '月1〜5万円',
+      中: '月5〜15万円',
+      多: '月15〜40万円'
+    },
+    actions: [
+      'coconalaに相談サービスを1件出品する',
+      'X・noteで「〇〇に関するお悩み相談DM受付中」と告知する',
+      '初月は3件の相談を実績として無料〜格安で受ける'
+    ]
+  },
+  教育型: {
+    emoji: '📚',
+    name: '教育型',
+    sub: 'Teacher / Coach',
+    desc: '人に教えること・育てることにやりがいを感じるタイプ。自分の経験をカリキュラム化し、講座やコーチングとして提供できる。受講生の変化・成長が最大のモチベーションになる。',
+    top3: ['オンライン講座（Udemy・Teachable）', '月額コーチングプログラム', 'コミュニティ運営（Discord等）'],
+    income: {
+      少: '月1〜4万円',
+      中: '月4〜12万円',
+      多: '月12〜35万円'
+    },
+    actions: [
+      '「自分が教えられること」を5つ書き出す',
+      'Zoomを使った60分体験セッションの設計をする',
+      'ストアカに無料体験講座を1本登録する'
+    ]
+  },
+  制作型: {
+    emoji: '✍️',
+    name: '制作型',
+    sub: 'Writer / Designer',
+    desc: 'コツコツと作業をこなし、クオリティの高いアウトプットを届けられるタイプ。ライティング・デザイン・動画編集など「制作物」で直接対価をもらうスタイルが向いている。案件単位で安定収益を積み上げられる。',
+    top3: ['ランサーズ・クラウドワークスでライティング', 'SNS運用代行', 'バナー・資料デザイン受注'],
+    income: {
+      少: '月1〜3万円',
+      中: '月3〜10万円',
+      多: '月10〜25万円'
+    },
+    actions: [
+      'ランサーズに登録してプロフィールを完成させる',
+      '過去の制作物をまとめたポートフォリオを1ページ作る',
+      '記事ライティング案件に3件応募する'
+    ]
+  },
+  仕組み型: {
+    emoji: '🔁',
+    name: '仕組み型',
+    sub: 'Automator / Affiliate',
+    desc: '一度仕組みを作れば自動で収益が生まれる「自動化型」の副業が向いているタイプ。アフィリエイトや情報商材のリピート販売など、時間を切り離した収益構造を作れる。立ち上がりに時間がかかるが、複利的に伸びる。',
+    top3: ['SEOアフィリエイトブログ', 'メルマガ自動化ファネル', 'AIを使ったコンテンツ量産×広告収益'],
+    income: {
+      少: '月0〜1万円',
+      中: '月1〜5万円',
+      多: '月5〜20万円'
+    },
+    actions: [
+      'A8.net・もしもアフィリエイトに登録する',
+      '自分の経験に近いジャンルの検索ボリュームを調べる',
+      'ブログ or Xで週2本のペースで情報発信を始める'
+    ]
+  }
+};
 
-      const note   = calcNote(f);
-      const consul = calcConsul(f);
-      const tool   = calcTool(f);
+// ============================================================
+// 診断ロジック（スコア合計でタイプを決定）
+// ============================================================
 
-      // フォロワー表示
-      document.getElementById('followerDisplay').textContent = f.toLocaleString('ja-JP');
+function calcType(answers) {
+  // スコアテーブル: answers の value → タイプへの加点
+  const scoreMap = {
+    '発信好き':    { 発信者型: 3, 教育型: 1 },
+    '発信苦手':    { 職人型: 2, 仕組み型: 2, 制作型: 1 },
+    '一人派':      { 職人型: 2, 仕組み型: 2, 制作型: 1 },
+    '人派':        { コンサル型: 3, 教育型: 3 },
+    'ツール好き':  { 職人型: 3, 仕組み型: 2 },
+    'ツール苦手':  { 発信者型: 1, コンサル型: 1, 制作型: 1 },
+    '時間少':      { コンサル型: 2, 仕組み型: 1 },
+    '時間中':      { 発信者型: 1, 制作型: 1, 教育型: 1 },
+    '時間多':      { 職人型: 1, 教育型: 2, 発信者型: 1 },
+    '知識販売OK':  { コンサル型: 2, 教育型: 2, 発信者型: 1 },
+    '知識販売NG':  { 制作型: 2, 仕組み型: 2 },
+    '継続派':      { 発信者型: 2, 職人型: 1, 仕組み型: 2 },
+    'スポット派':  { コンサル型: 2, 制作型: 2 },
+    '速攻派':      { コンサル型: 2, 制作型: 1 },
+    '積み上げ派':  { 仕組み型: 2, 職人型: 1, 発信者型: 1 }
+  };
 
-      // 各モデルの金額
-      document.getElementById('note-amount').textContent   = formatYen(note);
-      document.getElementById('consul-amount').textContent = formatYen(consul);
-      document.getElementById('tool-amount').textContent   = formatYen(tool);
+  const totals = {};
+  Object.keys(TYPES).forEach(t => totals[t] = 0);
 
-      // 結果の行
-      const updateRow = (id, resultId, val, active) => {
-        const row = document.getElementById('row-' + id);
-        const res = document.getElementById('result-' + id);
-        row.classList.toggle('active', active);
-        row.classList.toggle('inactive', !active);
-        res.textContent = formatYen(val);
-      };
-
-      updateRow('note',   'result-note',   note,   state.models.note);
-      updateRow('consul', 'result-consul', consul, state.models.consul);
-      updateRow('tool',   'result-tool',   tool,   state.models.tool);
-
-      // 合計
-      let total = 0;
-      if (state.models.note)   total += note;
-      if (state.models.consul) total += consul;
-      if (state.models.tool)   total += tool;
-
-      const totalEl = document.getElementById('totalAmount');
-      totalEl.textContent = formatYen(total);
-      totalEl.classList.add('updating');
-      setTimeout(() => totalEl.classList.remove('updating'), 300);
-
-      // Xシェアテキスト
-      const activeModels = [];
-      if (state.models.note)   activeModels.push(`note: ${formatYen(note)}`);
-      if (state.models.consul) activeModels.push(`匿名コンサル: ${formatYen(consul)}`);
-      if (state.models.tool)   activeModels.push(`ツール販売: ${formatYen(tool)}`);
-
-      const tweetText = [
-        `フォロワー${f.toLocaleString()}人で副業月収${formatYen(total)}の試算が出た🔥`,
-        '',
-        activeModels.join(' / '),
-        '',
-        '副業収益シミュレーターで自分の数字を確認 👇',
-        '#副業 #X副業 #note収益化'
-      ].join('\n');
-
-      document.getElementById('shareBtn').href =
-        'https://twitter.com/intent/tweet?text=' + encodeURIComponent(tweetText);
-    }
-
-    // --- イベント ---
-
-    // スライダー
-    const slider = document.getElementById('followerSlider');
-    slider.addEventListener('input', (e) => {
-      state.followers = parseInt(e.target.value, 10);
-      update();
+  answers.forEach(val => {
+    const map = scoreMap[val] || {};
+    Object.entries(map).forEach(([type, pts]) => {
+      totals[type] += pts;
     });
+  });
 
-    // モデル選択トグル
-    document.querySelectorAll('.model-item').forEach(item => {
-      item.addEventListener('click', () => {
-        const model = item.dataset.model;
-        state.models[model] = !state.models[model];
-        item.classList.toggle('active', state.models[model]);
-        update();
-      });
-    });
+  // 最高スコアのタイプを返す
+  return Object.entries(totals).sort((a, b) => b[1] - a[1])[0][0];
+}
 
-    // 初期描画
-    update();
-  </script>
+// チラ見せ（3問時点）の判定
+function sneakPeekType(answers) {
+  const hints = {
+    '発信好き': '発信・教育系',
+    '発信苦手': 'ツール・仕組み系',
+    '一人派': 'クリエイター・職人系',
+    '人派': 'コンサル・教育系',
+    'ツール好き': 'ツール・自動化系',
+    'ツール苦手': '発信・制作系'
+  };
+  for (const val of answers) {
+    if (hints[val]) return hints[val];
+  }
+  return '発信・副業系';
+}
+
+// ============================================================
+// 状態管理
+// ============================================================
+
+let currentQ = 0;
+let answers = [];       // 各質問の value を格納
+let resultType = null;
+let hoursVal = '時間中'; // デフォルト
+
+// ============================================================
+// 診断画面の描画
+// ============================================================
+
+function renderQuestion() {
+  const q = QUESTIONS[currentQ];
+  const total = QUESTIONS.length;
+  const pct = Math.round(((currentQ + 1) / total) * 100);
+
+  document.getElementById('progressText').textContent = `${currentQ + 1} / ${total}`;
+  document.getElementById('progressPct').textContent = `${pct}%`;
+  document.getElementById('progressFill').style.width = `${pct}%`;
+
+  document.getElementById('qNumber').textContent = `Q${currentQ + 1}`;
+  document.getElementById('qText').textContent = q.text;
+
+  const choicesEl = document.getElementById('choicesEl');
+  choicesEl.innerHTML = '';
+  q.choices.forEach((label, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.innerHTML = `${label} <span class="choice-arrow">→</span>`;
+    btn.addEventListener('click', () => onAnswer(q.values[i]));
+    choicesEl.appendChild(btn);
+  });
+
+  // チラ見せ（3問終了後）
+  if (currentQ >= 3 && answers.length >= 3) {
+    const sneak = document.getElementById('sneakPeek');
+    document.getElementById('sneakText').textContent =
+      `あなたの方向性：${sneakPeekType(answers.slice(0, 3))}の可能性が高いです`;
+    sneak.classList.add('show');
+  }
+}
+
+function onAnswer(value) {
+  answers.push(value);
+
+  // 時間の答えを記録（Q4はindex 3）
+  if (currentQ === 3) {
+    if (value === '時間少') hoursVal = '少';
+    else if (value === '時間中') hoursVal = '中';
+    else if (value === '時間多') hoursVal = '多';
+  }
+
+  currentQ++;
+
+  if (currentQ >= QUESTIONS.length) {
+    showResult();
+  } else {
+    renderQuestion();
+  }
+}
+
+// ============================================================
+// 結果画面
+// ============================================================
+
+function showResult() {
+  resultType = calcType(answers);
+  const t = TYPES[resultType];
+
+  // ヘッダー更新
+  document.getElementById('headerBadge').textContent = 'Result';
+  document.getElementById('headerTitle').textContent = 'あなたの副業タイプ';
+  document.getElementById('headerSub').textContent = '診断結果をチェックしよう';
+
+  // ヒーロー
+  document.getElementById('resEmoji').textContent = t.emoji;
+  document.getElementById('resTypeName').textContent = `${t.emoji} ${t.name}`;
+  document.getElementById('resTypeSub').textContent = t.sub;
+  document.getElementById('resDesc').textContent = t.desc;
+
+  // TOP3
+  const top3El = document.getElementById('resTop3');
+  top3El.innerHTML = '';
+  t.top3.forEach((item, i) => {
+    const medals = ['🥇', '🥈', '🥉'];
+    top3El.innerHTML += `
+      <div class="top3-item">
+        <span class="top3-rank">${medals[i]}</span>
+        <span class="top3-name">${item}</span>
+      </div>`;
+  });
+
+  // 月収レンジ
+  const incomeEl = document.getElementById('resIncome');
+  const timeLabels = {
+    少: '週3時間以下',
+    中: '週3〜10時間',
+    多: '週10時間以上'
+  };
+  incomeEl.innerHTML = '';
+  Object.entries(t.income).forEach(([key, range]) => {
+    const isHighlight = key === hoursVal;
+    incomeEl.innerHTML += `
+      <div class="income-row ${isHighlight ? 'highlight' : ''}">
+        <span class="income-time">${timeLabels[key]}${isHighlight ? ' ← あなた' : ''}</span>
+        <span class="income-range">${range}のポテンシャル</span>
+      </div>`;
+  });
+
+  // ファーストアクション
+  const actionsEl = document.getElementById('resActions');
+  actionsEl.innerHTML = '';
+  t.actions.forEach((action, i) => {
+    actionsEl.innerHTML += `
+      <div class="action-item">
+        <div class="action-num">${i + 1}</div>
+        <div class="action-text">${action}</div>
+      </div>`;
+  });
+
+  // Xシェアテキスト
+  const shareText = `副業タイプ診断をやってみた！\n\n私は${t.emoji}${t.name}でした\n「${t.sub}」\n\n向いている副業TOP1: ${t.top3[0]}\n月収ポテンシャル（今の時間だと）: ${t.income[hoursVal] || t.income['中']}\n\n#副業 #AI副業 #副業タイプ診断`;
+  document.getElementById('shareBtn').href =
+    'https://twitter.com/intent/tweet?text=' + encodeURIComponent(shareText);
+
+  // 画面切り替え
+  document.getElementById('diagScreen').style.display = 'none';
+  document.getElementById('resultScreen').style.display = 'block';
+  document.getElementById('simScreen').style.display = 'none';
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ============================================================
+// シミュレーター画面
+// ============================================================
+
+const simState = {
+  followers: 1000,
+  models: { note: true, consul: true, tool: true }
+};
+
+function calcNote(f)   { return Math.floor(f * 0.01 * 1000); }
+function calcConsul(f) { return Math.floor(f * 0.001 * 15000); }
+function calcTool(f)   { return Math.floor(f * 0.005 * 500); }
+function formatYen(n)  { return '¥' + n.toLocaleString('ja-JP'); }
+
+function updateSim() {
+  const f = simState.followers;
+  const note   = calcNote(f);
+  const consul = calcConsul(f);
+  const tool   = calcTool(f);
+
+  document.getElementById('followerDisplay').textContent = f.toLocaleString('ja-JP');
+  document.getElementById('note-amount').textContent   = formatYen(note);
+  document.getElementById('consul-amount').textContent = formatYen(consul);
+  document.getElementById('tool-amount').textContent   = formatYen(tool);
+
+  const updateRow = (id, val, active) => {
+    const row = document.getElementById('row-' + id);
+    const res = document.getElementById('result-' + id);
+    row.classList.toggle('active', active);
+    row.classList.toggle('inactive', !active);
+    res.textContent = formatYen(val);
+  };
+  updateRow('note',   note,   simState.models.note);
+  updateRow('consul', consul, simState.models.consul);
+  updateRow('tool',   tool,   simState.models.tool);
+
+  let total = 0;
+  if (simState.models.note)   total += note;
+  if (simState.models.consul) total += consul;
+  if (simState.models.tool)   total += tool;
+
+  const totalEl = document.getElementById('totalAmount');
+  totalEl.textContent = formatYen(total);
+  totalEl.classList.add('updating');
+  setTimeout(() => totalEl.classList.remove('updating'), 300);
+
+  // シェアテキスト
+  const activeModels = [];
+  if (simState.models.note)   activeModels.push(`note: ${formatYen(note)}`);
+  if (simState.models.consul) activeModels.push(`匿名コンサル: ${formatYen(consul)}`);
+  if (simState.models.tool)   activeModels.push(`ツール販売: ${formatYen(tool)}`);
+
+  const tweetText = [
+    `フォロワー${f.toLocaleString()}人で副業月収${formatYen(total)}の試算が出た🔥`,
+    '',
+    activeModels.join(' / '),
+    '',
+    '副業収益シミュレーターで自分の数字を確認 👇',
+    '#副業 #X副業 #note収益化'
+  ].join('\n');
+  document.getElementById('simShareBtn').href =
+    'https://twitter.com/intent/tweet?text=' + encodeURIComponent(tweetText);
+}
+
+function showSim() {
+  document.getElementById('headerBadge').textContent = 'Simulator v2';
+  document.getElementById('headerTitle').textContent = '副業収益シミュレーター';
+  document.getElementById('headerSub').textContent = 'フォロワー数から月収を試算してみよう';
+
+  document.getElementById('diagScreen').style.display = 'none';
+  document.getElementById('resultScreen').style.display = 'none';
+  document.getElementById('simScreen').style.display = 'block';
+
+  updateSim();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ============================================================
+// イベントリスナー
+// ============================================================
+
+// シミュレーターボタン
+document.getElementById('simBtn').addEventListener('click', showSim);
+
+// 診断に戻る
+document.getElementById('retryBtn').addEventListener('click', () => {
+  currentQ = 0;
+  answers = [];
+  hoursVal = '時間中';
+  resultType = null;
+
+  document.getElementById('headerBadge').textContent = 'Diagnosis v2';
+  document.getElementById('headerTitle').textContent = '副業タイプ診断';
+  document.getElementById('headerSub').textContent = '7問に答えてあなたの副業タイプを発見しよう';
+
+  document.getElementById('sneakPeek').classList.remove('show');
+  document.getElementById('diagScreen').style.display = 'block';
+  document.getElementById('resultScreen').style.display = 'none';
+  document.getElementById('simScreen').style.display = 'none';
+
+  renderQuestion();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+// 結果に戻る
+document.getElementById('backToResultBtn').addEventListener('click', () => {
+  if (resultType) {
+    document.getElementById('headerBadge').textContent = 'Result';
+    document.getElementById('headerTitle').textContent = 'あなたの副業タイプ';
+    document.getElementById('headerSub').textContent = '診断結果をチェックしよう';
+    document.getElementById('diagScreen').style.display = 'none';
+    document.getElementById('resultScreen').style.display = 'block';
+    document.getElementById('simScreen').style.display = 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+});
+
+// スライダー
+document.getElementById('followerSlider').addEventListener('input', (e) => {
+  simState.followers = parseInt(e.target.value, 10);
+  updateSim();
+});
+
+// モデルトグル
+document.querySelectorAll('.model-item').forEach(item => {
+  item.addEventListener('click', () => {
+    const model = item.dataset.model;
+    simState.models[model] = !simState.models[model];
+    item.classList.toggle('active', simState.models[model]);
+    updateSim();
+  });
+});
+
+// ============================================================
+// 初期描画
+// ============================================================
+
+renderQuestion();
+</script>
 </body>
 </html>

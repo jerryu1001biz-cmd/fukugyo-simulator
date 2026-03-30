@@ -52,10 +52,14 @@
     .tabs {
       display: flex;
       gap: 6px;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
       margin-bottom: 20px;
-      justify-content: center;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 4px;
+      scrollbar-width: none;
     }
+    .tabs::-webkit-scrollbar { display: none; }
     .tab {
       background: #131929;
       border: 1px solid #1e2a45;
@@ -66,6 +70,8 @@
       border-radius: 20px;
       cursor: pointer;
       transition: all 0.2s;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
     .tab:hover { border-color: #6c63ff; color: #c8cef0; }
     .tab.active {

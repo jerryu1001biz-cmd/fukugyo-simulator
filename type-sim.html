@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>副業タイプ別シミュレーター</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0a0f1e;
+      color: #e8eaf6;
+      font-family: 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+      min-height: 100vh;
+      padding: 24px 16px 48px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #3b4fd8, #6c63ff);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+    }
+    .header h1 {
+      font-size: 20px;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.3;
+    }
+    .header p {
+      color: #8892b0;
+      font-size: 13px;
+      margin-top: 6px;
+    }
+
+    /* タブ */
+    .tabs {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+      justify-content: center;
+    }
+    .tab {
+      background: #131929;
+      border: 1px solid #1e2a45;
+      color: #8892b0;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 8px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tab:hover { border-color: #6c63ff; color: #c8cef0; }
+    .tab.active {
+      background: linear-gradient(135deg, #3b4fd8, #6c63ff);
+      border-color: transparent;
+      color: #fff;
+    }
+
+    /* シミュレーターカード */
+    .sim-card {
+      background: #131929;
+      border: 1px solid #1e2a45;
+      border-radius: 16px;
+      padding: 24px;
+      display: none;
+    }
+    .sim-card.active { display: block; }
+
+    .sim-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .type-emoji {
+      font-size: 32px;
+    }
+    .type-info h2 {
+      font-size: 18px;
+      font-weight: 800;
+      color: #fff;
+    }
+    .type-info .sub {
+      font-size: 11px;
+      color: #6c63ff;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    /* 収益表示 */
+    .income-display {
+      background: linear-gradient(135deg, #0d1433, #1a1040);
+      border: 1px solid #2a2060;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .income-label {
+      font-size: 11px;
+      color: #6c63ff;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      margin-bottom: 6px;
+    }
+    .income-amount {
+      font-size: 40px;
+      font-weight: 900;
+      color: #fff;
+      line-height: 1;
+    }
+    .income-amount span {
+      font-size: 18px;
+      color: #8892b0;
+    }
+    .income-sub {
+      font-size: 12px;
+      color: #8892b0;
+      margin-top: 6px;
+    }
+
+    /* スライダー */
+    .slider-group {
+      margin-bottom: 18px;
+    }
+    .slider-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .slider-label .name {
+      font-size: 13px;
+      color: #c8cef0;
+      font-weight: 600;
+    }
+    .slider-label .value {
+      font-size: 14px;
+      font-weight: 700;
+      color: #a78bfa;
+    }
+    input[type="range"] {
+      width: 100%;
+      appearance: none;
+      height: 6px;
+      border-radius: 3px;
+      background: #1e2a45;
+      outline: none;
+      cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6c63ff, #3b4fd8);
+      cursor: pointer;
+      box-shadow: 0 0 8px rgba(108,99,255,0.5);
+    }
+
+    /* シェアボタン */
+    .share-btn {
+      width: 100%;
+      background: #1a1a2e;
+      border: 1px solid #333;
+      color: #e8eaf6;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: background 0.2s;
+    }
+    .share-btn:hover { background: #252540; }
+
+    .back-link {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .back-link a {
+      color: #6c63ff;
+      font-size: 13px;
+      text-decoration: none;
+    }
+    .back-link a:hover { text-decoration: underline; }
+
+    .formula-note {
+      font-size: 11px;
+      color: #5a6580;
+      text-align: center;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="badge">TYPE SIMULATOR</div>
+    <h1>副業タイプ別<br>収益シミュレーター</h1>
+    <p>タイプごとに違う計算式で試算する</p>
+  </div>
+
+  <!-- タブ -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('hasshin')">🔥 発信者型</button>
+    <button class="tab" onclick="switchTab('shokunin')">🛠 職人型</button>
+    <button class="tab" onclick="switchTab('consul')">🎯 コンサル型</button>
+    <button class="tab" onclick="switchTab('kyoiku')">📚 教育型</button>
+    <button class="tab" onclick="switchTab('seisaku')">✍️ 制作型</button>
+    <button class="tab" onclick="switchTab('shikumi')">🔁 仕組み型</button>
+  </div>
+
+  <!-- 🔥 発信者型 -->
+  <div class="sim-card active" id="sim-hasshin">
+    <div class="sim-header">
+      <div class="type-emoji">🔥</div>
+      <div class="type-info">
+        <h2>発信者型</h2>
+        <div class="sub">Influencer / Creator</div>
+      </div>
+    </div>
+    <div class="income-display">
+      <div class="income-label">月収ポテンシャル</div>
+      <div class="income-amount" id="hasshin-result"><span>¥</span>0</div>
+      <div class="income-sub" id="hasshin-formula">フォロワー × 購入率 × 記事単価</div>
+    </div>
+    <div class="slider-group">
+      <div class="slider-label">
+        <span class="name">フォロワー数</span>
+        <span class="value" id="hasshin-followers-val">1,000人</span>
+      </div>
+      <input type="range" id="hasshin-followers" min="100" max="50000" step="100" value="1000" oninput="calcHasshin()">
+    </div>
+    <div class="slider-group">
+      <div class="slider-label">
+        <span class="name">購入率</span>
+        <span class="value" id="hasshin-rate-val">1.0%</span>
+      </div>
+      <input type="range" id="hasshin-rate" min="0.5" max="5" step="0.1" value="1" oninput="calcHasshin()">
+    </div>
+    <div class="slider-group">
+      <div class="slider-label">
+        <span class="name">記事単価</span>
+        <span class="value" id="hasshin-price-val">500円</span>
+      </div>
+      <input type="range" id="hasshin-price" min="100" max="3000" step="100" value="500" oninput="calcHasshin()">
+    </div>
+    <div class="formula-note">計算式：フォロワー × 購入率 × 記事単価</div>
+    <button class="share-btn" onclick="shareResult('hasshin')">X（Twitter）でシェア</button>
+  </div>
+
+  <!-- 🛠 職人型 -->
+  <div class="sim-card" id="sim-shokunin">
+    <div class="sim-header">
+      <div class="type-emoji">🛠</div>
+      <div class="type-info">
+        <h2>職人型</h2>
+        <div class="sub">Builder / Maker</div>
+      </div>
+    </div>
+    <div class="income-display">
+      <div class="income-label">月収ポテンシャル</div>
+      <div class="income-amount" id="shokunin-result"><span>¥</span>0</div>
+      <div class="income-sub">月間販売数 × 商品単価</div>
+    </div>
+    <div class="slider-group">
+      <div class="slider-label">
+        <span class="name">月間販売数</span>
+        <span class="value" id="shokunin-sales-val">10件</span>
+      </div>
+      <input type="range" id="shokunin-sales" min="1" max="200" step="1" value="10" oninput="calcShokunin()">
+    </div>
+    <div class="slider-group">
+      <div class="slider-label">
+        <span class="name">商品単価</span>
+        <span class="value" id="shokunin-price-val">1,000円</span>
+      </div>
+      <input type="range" id="shokunin-price" min="300" max="50000" step="100" value="1000" oninput="calcShokunin()">
+    </div>
+    <div class="formula-note">計算式：月間販売数 × 商品単価</div>
+    <button class="share-btn" onclick="shareResult('shokunin')">X（Twitter）でシェア</button>
+  </div>
+
+  <!-- 🎯 コンサル型 -->
+  <div class="sim-card" id="sim-consul">
+    <div class="sim-header">
+      <div class="type-emoji">🎯</div>
+      <div class="type-info">
+        <h2>コンサル型</h2>
+        <div class="sub">Advisor / Consultant</div>
+      </div>
+    </div>
+    <div class="income-display">
+      <div class="income-label">月収ポテンシャル</div>
+      <div class="income-amount" id="consul-result"><span>¥</span>0</div>
+      <div class="income-sub">月間件数 × セッション単価</div>
+    </div>
+    <div class="slider-group">
+      <div class="slider-label">
+        <span class="name">月間件数</span>
+        <span class="value" id="consul-count-val">4件</span>
+      </div>
+      <input type="range" id="consul-count" min="1" max="30" step="1" value="4" oninput="calcConsul()">
+    </div>
+    <div class="slider-group">
+      <div class="slider-label">
+        <span class="name">セッション単価</span>
+        <span class="value" id="consul-price-val">10,000円</span>
+      </div>
+      <input type="range" id="consul-price" min="3000" max="100000" step="1000" value="10000" oninput="calcConsul()">
+    </div>
+    <div class="formula-note">計算式：月間件数 × セッション単価</div>
+    <button class="share-btn" onclick="shareResult('consul')">X（Twitter）でシェア</button>
+  </div>
+
+  <!-- 📚 教育型 -->
+  <div class="sim-card" id="sim-kyoiku">
+    <div class="sim-header">
+      <div class="type-emoji">📚</div>
+      <div class="type-info">
+        <h2>教育型</h2>
+        <div class="sub">Teacher / Coach</div>
+      </div>
+    </div>
+    <div class="income-display">
+      <div class="income-label">月収ポテンシャル</div>
+      <div class="income-amount" id="kyoiku-result"><span>¥</span>0</div>
+      <div class="income-sub">月間受講者数 × 受講料</div>
+    </div>
+    <div class="slider-group">
+      <div class="slider-label">
+        <span class="name">月間受講者数</span>
+        <span class="value" id="kyoiku-students-val">5人</span>
+      </div>
+      <input type="range" id="kyoiku-students" min="1" max="100" step="1" value="5" oninput="calcKyoiku()">
+    </div>
+    <div class="slider-group">
+      <div class="slider-label">
+        <span class="name">受講料</span>
+        <span class="value" id="kyoiku-price-val">10,000円</span>
+      </div>
+      <input type="range" id="kyoiku-price" min="1000" max="100000" step="1000" value="10000" oninput="calcKyoiku()">
+    </div>
+    <div class="formula-note">計算式：月間受講者数 × 受講料</div>
+    <button class="share-btn" onclick="shareResult('kyoiku')">X（Twitter）でシェア</button>
+  </div>
+
+  <!-- ✍️ 制作型 -->
+  <div class="sim-card" id="sim-seisaku">
+    <div class="sim-header">
+      <div class="type-emoji">✍️</div>
+      <div class="type-info">
+        <h2>制作型</h2>
+        <div class="sub">Writer / Designer</div>
+      </div>
+    </div>
+    <div class="income-display">
+      <div class="income-label">月収ポテンシャル</div>
+      <div class="income-amount" id="seisaku-result"><span>¥</span>0</div>
+      <div class="income-sub">月間案件数 × 案件単価</div>
+    </div>
+    <div class="slider-group">
+      <div class="slider-label">
+        <span class="name">月間案件数</span>
+        <span class="value" id="seisaku-projects-val">3件</span>
+      </div>
+      <input type="range" id="seisaku-projects" min="1" max="20" step="1" value="3" oninput="calcSeisaku()">
+    </div>
+    <div class="slider-group">
+      <div class="slider-label">
+        <span class="name">案件単価</span>
+        <span class="value" id="seisaku-price-val">30,000円</span>
+      </div>
+      <input type="range" id="seisaku-price" min="5000" max="200000" step="5000" value="30000" oninput="calcSeisaku()">
+    </div>
+    <div class="formula-note">計算式：月間案件数 × 案件単価</div>
+    <button class="share-btn" onclick="shareResult('seisaku')">X（Twitter）でシェア</button>
+  </div>
+
+  <!-- 🔁 仕組み型 -->
+  <div class="sim-card" id="sim-shikumi">
+    <div class="sim-header">
+      <div class="type-emoji">🔁</div>
+      <div class="type-info">
+        <h2>仕組み型</h2>
+        <div class="sub">Automator / Affiliate</div>
+      </div>
+    </div>
+    <div class="income-display">
+      <div class="income-label">月収ポテンシャル</div>
+      <div class="income-amount" id="shikumi-result"><span>¥</span>0</div>
+      <div class="income-sub">仕組み数 × 1仕組みの月収</div>
+    </div>
+    <div class="slider-group">
+      <div class="slider-label">
+        <span class="name">仕組みの数</span>
+        <span class="value" id="shikumi-count-val">3本</span>
+      </div>
+      <input type="range" id="shikumi-count" min="1" max="20" step="1" value="3" oninput="calcShikumi()">
+    </div>
+    <div class="slider-group">
+      <div class="slider-label">
+        <span class="name">1仕組みの月収</span>
+        <span class="value" id="shikumi-monthly-val">5,000円</span>
+      </div>
+      <input type="range" id="shikumi-monthly" min="500" max="100000" step="500" value="5000" oninput="calcShikumi()">
+    </div>
+    <div class="formula-note">計算式：仕組み数 × 1仕組みの月収</div>
+    <button class="share-btn" onclick="shareResult('shikumi')">X（Twitter）でシェア</button>
+  </div>
+
+  <div class="back-link">
+    <a href="index.html">← 副業タイプ診断へ戻る</a>
+  </div>
+</div>
+
+<script>
+  function fmt(n) {
+    return '¥' + Math.round(n).toLocaleString('ja-JP');
+  }
+
+  function setResult(id, amount) {
+    const el = document.getElementById(id);
+    el.innerHTML = '<span>¥</span>' + Math.round(amount).toLocaleString('ja-JP');
+  }
+
+  // 🔥 発信者型
+  function calcHasshin() {
+    const followers = +document.getElementById('hasshin-followers').value;
+    const rate = +document.getElementById('hasshin-rate').value / 100;
+    const price = +document.getElementById('hasshin-price').value;
+    document.getElementById('hasshin-followers-val').textContent = followers.toLocaleString() + '人';
+    document.getElementById('hasshin-rate-val').textContent = (+document.getElementById('hasshin-rate').value).toFixed(1) + '%';
+    document.getElementById('hasshin-price-val').textContent = price.toLocaleString() + '円';
+    setResult('hasshin-result', followers * rate * price);
+  }
+
+  // 🛠 職人型
+  function calcShokunin() {
+    const sales = +document.getElementById('shokunin-sales').value;
+    const price = +document.getElementById('shokunin-price').value;
+    document.getElementById('shokunin-sales-val').textContent = sales + '件';
+    document.getElementById('shokunin-price-val').textContent = price.toLocaleString() + '円';
+    setResult('shokunin-result', sales * price);
+  }
+
+  // 🎯 コンサル型
+  function calcConsul() {
+    const count = +document.getElementById('consul-count').value;
+    const price = +document.getElementById('consul-price').value;
+    document.getElementById('consul-count-val').textContent = count + '件';
+    document.getElementById('consul-price-val').textContent = price.toLocaleString() + '円';
+    setResult('consul-result', count * price);
+  }
+
+  // 📚 教育型
+  function calcKyoiku() {
+    const students = +document.getElementById('kyoiku-students').value;
+    const price = +document.getElementById('kyoiku-price').value;
+    document.getElementById('kyoiku-students-val').textContent = students + '人';
+    document.getElementById('kyoiku-price-val').textContent = price.toLocaleString() + '円';
+    setResult('kyoiku-result', students * price);
+  }
+
+  // ✍️ 制作型
+  function calcSeisaku() {
+    const projects = +document.getElementById('seisaku-projects').value;
+    const price = +document.getElementById('seisaku-price').value;
+    document.getElementById('seisaku-projects-val').textContent = projects + '件';
+    document.getElementById('seisaku-price-val').textContent = price.toLocaleString() + '円';
+    setResult('seisaku-result', projects * price);
+  }
+
+  // 🔁 仕組み型
+  function calcShikumi() {
+    const count = +document.getElementById('shikumi-count').value;
+    const monthly = +document.getElementById('shikumi-monthly').value;
+    document.getElementById('shikumi-count-val').textContent = count + '本';
+    document.getElementById('shikumi-monthly-val').textContent = monthly.toLocaleString() + '円';
+    setResult('shikumi-result', count * monthly);
+  }
+
+  // タブ切替
+  function switchTab(type) {
+    document.querySelectorAll('.sim-card').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('sim-' + type).classList.add('active');
+    event.currentTarget.classList.add('active');
+  }
+
+  // シェア
+  const typeNames = {
+    hasshin: '🔥発信者型',
+    shokunin: '🛠職人型',
+    consul: '🎯コンサル型',
+    kyoiku: '📚教育型',
+    seisaku: '✍️制作型',
+    shikumi: '🔁仕組み型'
+  };
+
+  function shareResult(type) {
+    const resultEl = document.getElementById(type + '-result');
+    const amount = resultEl.textContent;
+    const typeName = typeNames[type];
+    const text = `${typeName}で試算したら月収${amount}だった。\n\n副業タイプ別シミュレーターで自分の数字を確かめてみて。\nhttps://fukugyo-simulator.vercel.app/type-sim.html\n#副業 #AI副業`;
+    window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text), '_blank');
+  }
+
+  // 初期計算
+  calcHasshin();
+  calcShokunin();
+  calcConsul();
+  calcKyoiku();
+  calcSeisaku();
+  calcShikumi();
+</script>
+</body>
+</html>

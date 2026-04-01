@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Claude Code 使いこなし度チェック</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0a0f1e;
+      color: #e8eaf6;
+      font-family: 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+      min-height: 100vh;
+      padding: 24px 16px 48px;
+    }
+    .container { width: 100%; max-width: 480px; margin: 0 auto; }
+
+    .header { text-align: center; margin-bottom: 28px; }
+    .badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #3b4fd8, #6c63ff);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+    }
+    .header h1 { font-size: 20px; font-weight: 800; color: #fff; line-height: 1.4; }
+    .header p { color: #8892b0; font-size: 13px; margin-top: 6px; }
+
+    /* プログレス */
+    .progress-wrap { margin-bottom: 20px; }
+    .progress-label { display: flex; justify-content: space-between; font-size: 12px; color: #8892b0; margin-bottom: 6px; }
+    .progress-bar { width: 100%; height: 4px; background: #1e2a45; border-radius: 2px; }
+    .progress-fill { height: 4px; background: linear-gradient(90deg, #3b4fd8, #6c63ff); border-radius: 2px; transition: width 0.4s; }
+
+    /* 質問カード */
+    .q-card {
+      background: #131929;
+      border: 1px solid #1e2a45;
+      border-radius: 16px;
+      padding: 24px;
+    }
+    .q-num { font-size: 11px; color: #6c63ff; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 10px; }
+    .q-text { font-size: 17px; font-weight: 700; color: #fff; line-height: 1.5; margin-bottom: 6px; }
+    .q-sub { font-size: 12px; color: #8892b0; margin-bottom: 20px; line-height: 1.6; }
+
+    .choices { display: flex; flex-direction: column; gap: 10px; }
+    .choice-btn {
+      background: #0d1433;
+      border: 1px solid #1e2a45;
+      color: #c8cef0;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 14px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s;
+    }
+    .choice-btn:hover { border-color: #6c63ff; color: #fff; background: #131940; }
+    .choice-btn.selected { border-color: #6c63ff; background: #1a1a50; color: #fff; }
+
+    /* 結果 */
+    .result-card {
+      background: #131929;
+      border: 1px solid #1e2a45;
+      border-radius: 16px;
+      padding: 28px 24px;
+      display: none;
+    }
+    .result-type-emoji { font-size: 52px; text-align: center; margin-bottom: 12px; }
+    .result-type-name { font-size: 22px; font-weight: 900; color: #fff; text-align: center; }
+    .result-type-sub { font-size: 12px; color: #6c63ff; font-weight: 700; text-align: center; margin-top: 4px; margin-bottom: 16px; }
+
+    .score-display {
+      background: linear-gradient(135deg, #0d1433, #1a1040);
+      border: 1px solid #2a2060;
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .score-num { font-size: 48px; font-weight: 900; color: #fff; line-height: 1; }
+    .score-label { font-size: 12px; color: #8892b0; margin-top: 4px; }
+
+    .result-desc { font-size: 14px; color: #c8cef0; line-height: 1.7; margin-bottom: 20px; }
+
+    .next-steps h3 { font-size: 13px; color: #6c63ff; font-weight: 700; margin-bottom: 10px; letter-spacing: 0.05em; }
+    .step-item {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+    .step-tag {
+      background: #1e2a45;
+      color: #a78bfa;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 10px;
+      white-space: nowrap;
+      margin-top: 1px;
+    }
+    .step-text { font-size: 13px; color: #8892b0; line-height: 1.5; }
+
+    .share-btn {
+      width: 100%;
+      background: #1a1a2e;
+      border: 1px solid #333;
+      color: #e8eaf6;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: background 0.2s;
+    }
+    .share-btn:hover { background: #252540; }
+    .retry-btn {
+      width: 100%;
+      background: transparent;
+      border: 1px solid #1e2a45;
+      color: #8892b0;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: all 0.2s;
+    }
+    .retry-btn:hover { border-color: #6c63ff; color: #c8cef0; }
+
+    .back-link { text-align: center; margin-top: 20px; }
+    .back-link a { color: #6c63ff; font-size: 13px; text-decoration: none; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="badge">CLAUDE CODE CHECK</div>
+    <h1>あなたのClaude Code<br>使いこなし度は何点？</h1>
+    <p>8問で診断。知らない機能が見つかるかも</p>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-label">
+      <span id="progress-text">1 / 8</span>
+      <span id="progress-pct">0%</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+  </div>
+
+  <div class="q-card" id="q-card">
+    <div class="q-num" id="q-num">Q1</div>
+    <div class="q-text" id="q-text"></div>
+    <div class="q-sub" id="q-sub"></div>
+    <div class="choices" id="choices"></div>
+  </div>
+
+  <div class="result-card" id="result-card">
+    <div class="result-type-emoji" id="res-emoji"></div>
+    <div class="result-type-name" id="res-name"></div>
+    <div class="result-type-sub" id="res-sub"></div>
+    <div class="score-display">
+      <div class="score-num" id="res-score"></div>
+      <div class="score-label">/ 100点</div>
+    </div>
+    <div class="result-desc" id="res-desc"></div>
+    <div class="next-steps">
+      <h3>📌 次に試すべき機能</h3>
+      <div id="res-steps"></div>
+    </div>
+    <button class="share-btn" id="share-btn">X（Twitter）でシェア</button>
+    <button class="retry-btn" onclick="restart()">もう一度やる</button>
+  </div>
+
+  <div class="back-link"><a href="index.html">← 副業タイプ診断へ</a></div>
+</div>
+
+<script>
+const questions = [
+  {
+    id: 'claude_md',
+    text: 'CLAUDE.mdを設定したことがある？',
+    sub: 'プロジェクトや個人のルールをClaudeに覚えさせるファイル',
+    choices: [
+      { label: 'はい、ちゃんと書いてある', score: 12 },
+      { label: '作ったけどほぼ空', score: 5 },
+      { label: '知ってるけど未設定', score: 2 },
+      { label: '初めて聞いた', score: 0 },
+    ]
+  },
+  {
+    id: 'skills',
+    text: 'カスタムスキル（/コマンド）を作ったことがある？',
+    sub: '手順を日本語で書いたファイルをスラッシュコマンドで呼び出せる機能',
+    choices: [
+      { label: '複数作って使ってる', score: 14 },
+      { label: '1〜2個作った', score: 8 },
+      { label: '知ってるけど未使用', score: 2 },
+      { label: '知らなかった', score: 0 },
+    ]
+  },
+  {
+    id: 'subagents',
+    text: 'サブエージェント（別エージェントに作業を依頼）を使ったことがある？',
+    sub: '別のClaudeに並行して調査・作業させる機能',
+    choices: [
+      { label: '日常的に使ってる', score: 14 },
+      { label: '使ったことある', score: 8 },
+      { label: '知ってるけど未使用', score: 2 },
+      { label: '知らなかった', score: 0 },
+    ]
+  },
+  {
+    id: 'mcp',
+    text: 'MCPサーバーを追加したことがある？',
+    sub: 'PlaywrightやGmailなど外部ツールをClaudeに接続する仕組み',
+    choices: [
+      { label: '複数追加して使ってる', score: 12 },
+      { label: '1つ追加した', score: 6 },
+      { label: '知ってるけど未設定', score: 2 },
+      { label: '知らなかった', score: 0 },
+    ]
+  },
+  {
+    id: 'commands',
+    text: 'これを知っている？　/btw・/branch・/loop',
+    sub: '作業中に割り込み質問・会話の分岐・定期実行ができるコマンド',
+    choices: [
+      { label: '全部知ってて使ってる', score: 12 },
+      { label: '聞いたことある程度', score: 4 },
+      { label: '知らなかった', score: 0 },
+    ]
+  },
+  {
+    id: 'hooks',
+    text: 'フック（Hooks）を設定したことがある？',
+    sub: 'ツール実行前後やセッション開始時に自動でコマンドを走らせる機能',
+    choices: [
+      { label: '設定して使ってる', score: 12 },
+      { label: '知ってるけど未設定', score: 2 },
+      { label: '知らなかった', score: 0 },
+    ]
+  },
+  {
+    id: 'worktree',
+    text: 'Git Worktreeを使ったことがある？',
+    sub: '複数のブランチを同時に開いてClaudeを並列作業させる機能',
+    choices: [
+      { label: '使ってる', score: 12 },
+      { label: '知ってるけど未使用', score: 2 },
+      { label: '知らなかった', score: 0 },
+    ]
+  },
+  {
+    id: 'mobile',
+    text: 'Claude Codeのモバイルアプリや音声入力（/voice）を使ったことがある？',
+    sub: 'iOSアプリのCodeタブやターミナルの/voiceコマンドで使える機能',
+    choices: [
+      { label: '使ってる', score: 12 },
+      { label: '知ってるけど未使用', score: 2 },
+      { label: '知らなかった', score: 0 },
+    ]
+  }
+];
+
+const types = [
+  {
+    min: 0, max: 20,
+    emoji: '🌱', name: '入門者', sub: 'まだポテンシャルが眠ってる',
+    desc: 'Claude Codeを使い始めたばかり、またはチャットだけで使っている状態。実はまだ1割も使えていないかも。CLAUDE.mdを設定するだけで体験が大きく変わります。',
+    steps: [
+      { tag: '最優先', text: 'CLAUDE.mdを作る。プロジェクトのルールを書いておくだけでClaudeの精度が上がる' },
+      { tag: 'おすすめ', text: 'カスタムスキルを1つ作ってみる。よく使う作業を/コマンドで呼び出せる' },
+    ]
+  },
+  {
+    min: 21, max: 40,
+    emoji: '🔰', name: '基礎ユーザー', sub: 'チャットだけじゃもったいない',
+    desc: 'CLAUDE.mdは設定できているが、スキルやエージェントなどの拡張機能はまだ未使用。ここから先が本当の使いこなしの始まり。',
+    steps: [
+      { tag: '次のステップ', text: 'カスタムスキルを作る。繰り返し使う作業を自動化できる' },
+      { tag: '試してみて', text: 'サブエージェントを使う。調査や並行作業をClaudeに委任できる' },
+    ]
+  },
+  {
+    min: 41, max: 60,
+    emoji: '⚙️', name: '中級者', sub: 'もう少しで本領発揮',
+    desc: 'スキルやエージェントを使い始めている。ここからフック・Worktree・ループを覚えると作業効率が一段上がる。',
+    steps: [
+      { tag: '効果大', text: 'Hooksを設定する。セッション開始時の自動読み込みや作業ログの自動記録ができる' },
+      { tag: '強力', text: '/loopを使う。定期実行でClaudeを自動巡回させられる' },
+    ]
+  },
+  {
+    min: 61, max: 80,
+    emoji: '🚀', name: '上級者', sub: 'Claude Codeの真価を引き出してる',
+    desc: 'ほとんどの機能を把握・活用できている。Git Worktreeを使った並列作業やモバイル連携まで使いこなせれば完全制覇。',
+    steps: [
+      { tag: 'あと一歩', text: 'Git Worktreeで複数Claudeを並行稼働させる。大規模な変更を同時に進められる' },
+      { tag: '快適', text: '/voice（音声入力）を試す。タイピング不要でコーディングできる' },
+    ]
+  },
+  {
+    min: 81, max: 100,
+    emoji: '🏆', name: 'マスター', sub: '使いこなし度MAX',
+    desc: 'Claude Codeをほぼ完全に使いこなしている。ほとんどのユーザーが知らない機能まで把握済み。あとはループと並列エージェントで限界を突破するだけ。',
+    steps: [
+      { tag: '最前線', text: '/batchで大規模並列作業を試す。数十・数百のエージェントを同時稼働できる' },
+      { tag: '発信して', text: 'このレベルの知見はコンテンツになる。発信する価値あり' },
+    ]
+  }
+];
+
+let current = 0;
+let totalScore = 0;
+let wrongItems = [];
+
+function showQuestion(i) {
+  const q = questions[i];
+  document.getElementById('q-num').textContent = `Q${i + 1}`;
+  document.getElementById('q-text').textContent = q.text;
+  document.getElementById('q-sub').textContent = q.sub;
+  document.getElementById('progress-text').textContent = `${i + 1} / ${questions.length}`;
+  const pct = Math.round((i / questions.length) * 100);
+  document.getElementById('progress-pct').textContent = pct + '%';
+  document.getElementById('progress-fill').style.width = pct + '%';
+
+  const choicesEl = document.getElementById('choices');
+  choicesEl.innerHTML = '';
+  q.choices.forEach((c, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = c.label;
+    btn.onclick = () => answer(c.score, c.label, idx, q);
+    choicesEl.appendChild(btn);
+  });
+}
+
+function answer(score, label, idx, q) {
+  document.querySelectorAll('.choice-btn').forEach((b, i) => {
+    b.classList.toggle('selected', i === idx);
+    b.disabled = true;
+  });
+  totalScore += score;
+  if (score === 0) wrongItems.push(q.id);
+  setTimeout(() => {
+    current++;
+    if (current < questions.length) {
+      showQuestion(current);
+    } else {
+      showResult();
+    }
+  }, 300);
+}
+
+function showResult() {
+  document.getElementById('progress-text').textContent = `${questions.length} / ${questions.length}`;
+  document.getElementById('progress-pct').textContent = '100%';
+  document.getElementById('progress-fill').style.width = '100%';
+
+  document.getElementById('q-card').style.display = 'none';
+  const resCard = document.getElementById('result-card');
+  resCard.style.display = 'block';
+
+  const maxScore = questions.reduce((s, q) => s + Math.max(...q.choices.map(c => c.score)), 0);
+  const pct = Math.round((totalScore / maxScore) * 100);
+  const type = types.find(t => pct >= t.min && pct <= t.max) || types[0];
+
+  document.getElementById('res-emoji').textContent = type.emoji;
+  document.getElementById('res-name').textContent = type.name;
+  document.getElementById('res-sub').textContent = type.sub;
+  document.getElementById('res-score').textContent = pct;
+  document.getElementById('res-desc').textContent = type.desc;
+
+  const stepsEl = document.getElementById('res-steps');
+  stepsEl.innerHTML = '';
+  type.steps.forEach(s => {
+    stepsEl.innerHTML += `<div class="step-item"><span class="step-tag">${s.tag}</span><span class="step-text">${s.text}</span></div>`;
+  });
+
+  document.getElementById('share-btn').onclick = () => {
+    const text = `Claude Code使いこなし度チェックをやってみた。\n\n${type.emoji} ${type.name}（${pct}点）\n\n「${type.sub}」\n\nあなたは何点？\nhttps://fukugyo-simulator.vercel.app/claude-check.html\n#ClaudeCode #副業`;
+    window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text), '_blank');
+  };
+}
+
+function restart() {
+  current = 0;
+  totalScore = 0;
+  wrongItems = [];
+  document.getElementById('q-card').style.display = 'block';
+  document.getElementById('result-card').style.display = 'none';
+  showQuestion(0);
+}
+
+showQuestion(0);
+</script>
+</body>
+</html>

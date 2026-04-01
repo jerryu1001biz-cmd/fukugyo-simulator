@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>パパの副業できる時間チェッカー</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0a0f1e;
+      color: #e8eaf6;
+      font-family: 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+      min-height: 100vh;
+      padding: 24px 16px 48px;
+    }
+    .container { width: 100%; max-width: 480px; margin: 0 auto; }
+
+    .header { text-align: center; margin-bottom: 28px; }
+    .badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #3b4fd8, #6c63ff);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+    }
+    .header h1 { font-size: 20px; font-weight: 800; color: #fff; line-height: 1.4; }
+    .header p { color: #8892b0; font-size: 13px; margin-top: 6px; }
+
+    /* 結果表示 */
+    .result-box {
+      background: linear-gradient(135deg, #0d1433, #1a1040);
+      border: 1px solid #2a2060;
+      border-radius: 14px;
+      padding: 20px;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .result-label { font-size: 11px; color: #6c63ff; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 6px; }
+    .result-time { font-size: 52px; font-weight: 900; color: #fff; line-height: 1; }
+    .result-unit { font-size: 16px; color: #8892b0; }
+    .result-type { font-size: 15px; font-weight: 700; margin-top: 10px; }
+    .result-desc { font-size: 12px; color: #8892b0; margin-top: 6px; line-height: 1.6; }
+
+    /* 比較バッジ */
+    .compare-badge {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      margin-top: 8px;
+    }
+    .compare-up { background: #1a3a1a; color: #4ade80; }
+    .compare-down { background: #3a1a1a; color: #f87171; }
+    .compare-same { background: #1e2a45; color: #8892b0; }
+
+    /* 円グラフ風バー */
+    .time-bars { margin-bottom: 24px; }
+    .bar-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .bar-label { font-size: 12px; color: #8892b0; width: 72px; flex-shrink: 0; text-align: right; }
+    .bar-track { flex: 1; height: 8px; background: #1e2a45; border-radius: 4px; overflow: hidden; }
+    .bar-fill { height: 8px; border-radius: 4px; transition: width 0.4s; }
+    .bar-val { font-size: 12px; color: #c8cef0; width: 36px; flex-shrink: 0; }
+
+    .bar-sleep { background: #6c63ff; }
+    .bar-work { background: #3b82f6; }
+    .bar-commute { background: #06b6d4; }
+    .bar-childcare { background: #f59e0b; }
+    .bar-housework { background: #10b981; }
+    .bar-free { background: #a78bfa; }
+    .bar-fukugyo { background: #f43f5e; }
+
+    /* スライダー */
+    .card {
+      background: #131929;
+      border: 1px solid #1e2a45;
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .card-title { font-size: 13px; font-weight: 700; color: #a78bfa; margin-bottom: 14px; letter-spacing: 0.05em; }
+
+    .slider-group { margin-bottom: 14px; }
+    .slider-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+    .slider-name { font-size: 13px; color: #c8cef0; }
+    .slider-val { font-size: 14px; font-weight: 700; color: #a78bfa; }
+    input[type="range"] {
+      width: 100%;
+      appearance: none;
+      height: 5px;
+      border-radius: 3px;
+      background: #1e2a45;
+      outline: none;
+      cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6c63ff, #3b4fd8);
+      cursor: pointer;
+    }
+
+    .save-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #3b4fd8, #6c63ff);
+      border: none;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-bottom: 10px;
+      transition: opacity 0.2s;
+    }
+    .save-btn:hover { opacity: 0.85; }
+    .share-btn {
+      width: 100%;
+      background: #1a1a2e;
+      border: 1px solid #333;
+      color: #e8eaf6;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .share-btn:hover { background: #252540; }
+
+    .saved-note { font-size: 11px; color: #5a6580; text-align: center; margin-top: 8px; }
+
+    .back-link { text-align: center; margin-top: 20px; }
+    .back-link a { color: #6c63ff; font-size: 13px; text-decoration: none; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="badge">PAPA TIME CHECK</div>
+    <h1>パパの副業できる時間<br>チェッカー</h1>
+    <p>育児・仕事・家事を入力すると副業できる時間がわかる</p>
+  </div>
+
+  <!-- 結果 -->
+  <div class="result-box">
+    <div class="result-label">1日の副業可能時間</div>
+    <div><span class="result-time" id="fukugyo-time">0.0</span><span class="result-unit">時間</span></div>
+    <div class="result-type" id="result-type"></div>
+    <div class="result-desc" id="result-desc"></div>
+    <div id="compare-badge"></div>
+  </div>
+
+  <!-- 時間バー -->
+  <div class="time-bars">
+    <div class="bar-row"><span class="bar-label">睡眠</span><div class="bar-track"><div class="bar-fill bar-sleep" id="b-sleep"></div></div><span class="bar-val" id="bv-sleep"></span></div>
+    <div class="bar-row"><span class="bar-label">仕事</span><div class="bar-track"><div class="bar-fill bar-work" id="b-work"></div></div><span class="bar-val" id="bv-work"></span></div>
+    <div class="bar-row"><span class="bar-label">通勤</span><div class="bar-track"><div class="bar-fill bar-commute" id="b-commute"></div></div><span class="bar-val" id="bv-commute"></span></div>
+    <div class="bar-row"><span class="bar-label">育児</span><div class="bar-track"><div class="bar-fill bar-childcare" id="b-childcare"></div></div><span class="bar-val" id="bv-childcare"></span></div>
+    <div class="bar-row"><span class="bar-label">家事</span><div class="bar-track"><div class="bar-fill bar-housework" id="b-housework"></div></div><span class="bar-val" id="bv-housework"></span></div>
+    <div class="bar-row"><span class="bar-label">食事・風呂等</span><div class="bar-track"><div class="bar-fill bar-free" id="b-fixed"></div></div><span class="bar-val">1.5h</span></div>
+    <div class="bar-row"><span class="bar-label" style="color:#f43f5e;font-weight:700;">副業</span><div class="bar-track"><div class="bar-fill bar-fukugyo" id="b-fukugyo"></div></div><span class="bar-val" id="bv-fukugyo" style="color:#f43f5e;font-weight:700;"></span></div>
+  </div>
+
+  <!-- 入力 -->
+  <div class="card">
+    <div class="card-title">⏰ 基本時間</div>
+    <div class="slider-group">
+      <div class="slider-label"><span class="slider-name">睡眠時間</span><span class="slider-val" id="v-sleep">7.0時間</span></div>
+      <input type="range" id="s-sleep" min="4" max="10" step="0.5" value="7" oninput="calc()">
+    </div>
+    <div class="slider-group">
+      <div class="slider-label"><span class="slider-name">仕事時間</span><span class="slider-val" id="v-work">8.0時間</span></div>
+      <input type="range" id="s-work" min="6" max="12" step="0.5" value="8" oninput="calc()">
+    </div>
+    <div class="slider-group">
+      <div class="slider-label"><span class="slider-name">通勤時間（往復）</span><span class="slider-val" id="v-commute">1.0時間</span></div>
+      <input type="range" id="s-commute" min="0" max="3" step="0.5" value="1" oninput="calc()">
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">👶 育児・家事時間</div>
+    <div class="slider-group">
+      <div class="slider-label">
+        <span class="slider-name">育児時間</span>
+        <span class="slider-val" id="v-childcare">2.0時間</span>
+      </div>
+      <input type="range" id="s-childcare" min="0" max="6" step="0.5" value="2" oninput="calc()">
+      <div style="font-size:11px;color:#5a6580;margin-top:4px;">日本の父親平均：約2時間（厚労省調査）</div>
+    </div>
+    <div class="slider-group">
+      <div class="slider-label"><span class="slider-name">家事時間</span><span class="slider-val" id="v-housework">1.0時間</span></div>
+      <input type="range" id="s-housework" min="0" max="4" step="0.5" value="1" oninput="calc()">
+    </div>
+  </div>
+
+  <button class="save-btn" onclick="saveData()">今日の数字を保存する</button>
+  <button class="share-btn" onclick="share()">X（Twitter）でシェア</button>
+  <div class="saved-note" id="saved-note"></div>
+
+  <div class="back-link"><a href="index.html">← 副業タイプ診断へ</a></div>
+</div>
+
+<script>
+const FIXED = 1.5; // 食事・風呂・その他固定時間
+
+const types = [
+  { min: 2, emoji: '🔥', label: '本気でやれる', desc: '2時間以上確保できてる。継続すれば3ヶ月で結果が出る時間量。' },
+  { min: 1, emoji: '⚡', label: '毎日コツコツ型', desc: '1〜2時間。少ないようで、毎日続ければ年間365時間以上。十分な量。' },
+  { min: 0.5, emoji: '🌱', label: 'スキマ時間活用型', desc: '30分〜1時間。通勤中や昼休みに集中するスタイルが向いてる。' },
+  { min: 0, emoji: '😅', label: 'まず週1から', desc: '今は難しい状況。平日は無理せず、週末だけでもOK。' },
+];
+
+function calc() {
+  const sleep = +document.getElementById('s-sleep').value;
+  const work = +document.getElementById('s-work').value;
+  const commute = +document.getElementById('s-commute').value;
+  const childcare = +document.getElementById('s-childcare').value;
+  const housework = +document.getElementById('s-housework').value;
+
+  document.getElementById('v-sleep').textContent = sleep.toFixed(1) + '時間';
+  document.getElementById('v-work').textContent = work.toFixed(1) + '時間';
+  document.getElementById('v-commute').textContent = commute.toFixed(1) + '時間';
+  document.getElementById('v-childcare').textContent = childcare.toFixed(1) + '時間';
+  document.getElementById('v-housework').textContent = housework.toFixed(1) + '時間';
+
+  const used = sleep + work + commute + childcare + housework + FIXED;
+  const fukugyo = Math.max(0, 24 - used);
+
+  document.getElementById('fukugyo-time').textContent = fukugyo.toFixed(1);
+
+  // バー更新
+  const setBar = (id, val, valId) => {
+    document.getElementById(id).style.width = Math.min(100, (val / 24) * 100) + '%';
+    if (valId) document.getElementById(valId).textContent = val.toFixed(1) + 'h';
+  };
+  setBar('b-sleep', sleep, 'bv-sleep');
+  setBar('b-work', work, 'bv-work');
+  setBar('b-commute', commute, 'bv-commute');
+  setBar('b-childcare', childcare, 'bv-childcare');
+  setBar('b-housework', housework, 'bv-housework');
+  setBar('b-fixed', FIXED, null);
+  setBar('b-fukugyo', fukugyo, 'bv-fukugyo');
+
+  // タイプ判定
+  const type = types.find(t => fukugyo >= t.min) || types[types.length - 1];
+  document.getElementById('result-type').textContent = type.emoji + ' ' + type.label;
+  document.getElementById('result-desc').textContent = type.desc;
+
+  // 前回比較
+  const prev = JSON.parse(localStorage.getItem('papa-time-prev') || 'null');
+  const badge = document.getElementById('compare-badge');
+  if (prev !== null) {
+    const diff = fukugyo - prev;
+    if (Math.abs(diff) < 0.1) {
+      badge.innerHTML = `<span class="compare-badge compare-same">前回と同じ</span>`;
+    } else if (diff > 0) {
+      badge.innerHTML = `<span class="compare-badge compare-up">▲ 前回より +${diff.toFixed(1)}時間</span>`;
+    } else {
+      badge.innerHTML = `<span class="compare-badge compare-down">▼ 前回より ${diff.toFixed(1)}時間</span>`;
+    }
+  }
+}
+
+function saveData() {
+  const fukugyo = parseFloat(document.getElementById('fukugyo-time').textContent);
+  const prev = JSON.parse(localStorage.getItem('papa-time-save') || 'null');
+  if (prev !== null) localStorage.setItem('papa-time-prev', prev.fukugyo);
+  const data = {
+    fukugyo,
+    sleep: +document.getElementById('s-sleep').value,
+    work: +document.getElementById('s-work').value,
+    commute: +document.getElementById('s-commute').value,
+    childcare: +document.getElementById('s-childcare').value,
+    housework: +document.getElementById('s-housework').value,
+    date: new Date().toLocaleDateString('ja-JP')
+  };
+  localStorage.setItem('papa-time-save', JSON.stringify(data));
+  document.getElementById('saved-note').textContent = `✓ ${data.date} の数字を保存しました`;
+  calc();
+}
+
+function share() {
+  const time = document.getElementById('fukugyo-time').textContent;
+  const type = document.getElementById('result-type').textContent;
+  const text = `育児・仕事・家事を入れたら、副業できる時間は1日${time}時間だった。\n\n${type}\n\nパパの時間チェッカーで自分の数字を確かめてみて。\nhttps://fukugyo-simulator.vercel.app/papa-time.html\n#副業パパ #AI副業`;
+  window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text), '_blank');
+}
+
+// 保存データがあれば復元
+const saved = JSON.parse(localStorage.getItem('papa-time-save') || 'null');
+if (saved) {
+  document.getElementById('s-sleep').value = saved.sleep;
+  document.getElementById('s-work').value = saved.work;
+  document.getElementById('s-commute').value = saved.commute;
+  document.getElementById('s-childcare').value = saved.childcare;
+  document.getElementById('s-housework').value = saved.housework;
+  document.getElementById('saved-note').textContent = `前回（${saved.date}）の数字を読み込みました`;
+}
+
+calc();
+</script>
+</body>
+</html>

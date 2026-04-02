@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>副業ステージ診断｜今あなたはどのステージ？</title>
+  <meta property="og:title" content="副業ステージ診断" />
+  <meta property="og:description" content="今あなたはどのステージ？6問で診断します" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0a0f1e;
+      color: #e8eaf6;
+      font-family: 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+      min-height: 100vh;
+      padding: 24px 16px 48px;
+    }
+    .container { width: 100%; max-width: 480px; margin: 0 auto; }
+
+    .header { text-align: center; margin-bottom: 28px; }
+    .badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+    }
+    .header h1 { font-size: 20px; font-weight: 800; color: #fff; line-height: 1.4; }
+    .header p { color: #8892b0; font-size: 13px; margin-top: 6px; }
+
+    .progress-wrap { margin-bottom: 20px; }
+    .progress-label { display: flex; justify-content: space-between; font-size: 12px; color: #8892b0; margin-bottom: 6px; }
+    .progress-bar { width: 100%; height: 4px; background: #1e2a45; border-radius: 2px; }
+    .progress-fill { height: 4px; background: linear-gradient(90deg, #6366f1, #8b5cf6); border-radius: 2px; transition: width 0.4s; }
+
+    .q-card { background: #131929; border: 1px solid #1e2a45; border-radius: 16px; padding: 24px; }
+    .q-num { font-size: 11px; color: #8b5cf6; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 10px; }
+    .q-text { font-size: 17px; font-weight: 700; color: #fff; line-height: 1.5; margin-bottom: 20px; }
+    .choices { display: flex; flex-direction: column; gap: 10px; }
+    .choice-btn {
+      background: #0d1433;
+      border: 1px solid #1e2a45;
+      color: #c8cef0;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 14px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s;
+      line-height: 1.4;
+    }
+    .choice-btn:hover { border-color: #6366f1; background: #131f3a; color: #fff; }
+
+    /* 結果画面 */
+    #result { display: none; }
+    .result-card {
+      border-radius: 20px;
+      padding: 32px 24px;
+      text-align: center;
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    .result-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      opacity: 0.12;
+      border-radius: 20px;
+    }
+    .stage-emoji { font-size: 56px; margin-bottom: 12px; display: block; }
+    .stage-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      margin-bottom: 8px;
+      opacity: 0.8;
+    }
+    .stage-name { font-size: 26px; font-weight: 900; color: #fff; margin-bottom: 12px; line-height: 1.2; }
+    .stage-desc { font-size: 14px; line-height: 1.7; color: #c8cef0; }
+
+    .next-card {
+      background: #131929;
+      border: 1px solid #1e2a45;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .next-title { font-size: 12px; color: #8892b0; font-weight: 700; letter-spacing: 0.08em; margin-bottom: 12px; }
+    .next-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .next-list li {
+      font-size: 14px;
+      color: #c8cef0;
+      padding-left: 20px;
+      position: relative;
+      line-height: 1.5;
+    }
+    .next-list li::before { content: '▶'; position: absolute; left: 0; font-size: 10px; color: #6366f1; top: 3px; }
+
+    .share-btn {
+      display: block;
+      width: 100%;
+      background: #1d9bf0;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 800;
+      padding: 16px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      margin-bottom: 12px;
+      transition: opacity 0.2s;
+    }
+    .share-btn:hover { opacity: 0.85; }
+
+    .retry-btn {
+      display: block;
+      width: 100%;
+      background: transparent;
+      color: #8892b0;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid #1e2a45;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .retry-btn:hover { color: #fff; border-color: #6366f1; }
+
+    /* ステージ別カラー */
+    .s1 { background: linear-gradient(135deg, #1a1a2e, #16213e); border: 2px solid #374151; }
+    .s1 .stage-label { color: #9ca3af; }
+    .s2 { background: linear-gradient(135deg, #1c1d0a, #2d2b00); border: 2px solid #d97706; }
+    .s2 .stage-label { color: #fbbf24; }
+    .s3 { background: linear-gradient(135deg, #0a1628, #0d2137); border: 2px solid #3b82f6; }
+    .s3 .stage-label { color: #60a5fa; }
+    .s4 { background: linear-gradient(135deg, #0a1a0f, #0d2618); border: 2px solid #10b981; }
+    .s4 .stage-label { color: #34d399; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="badge">STAGE CHECK</div>
+    <h1>副業、今あなたは<br>どのステージ？</h1>
+    <p>6問で現在地を診断します</p>
+  </div>
+
+  <!-- 診断フォーム -->
+  <div id="quiz">
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span id="q-label">Q1 / 6</span>
+        <span id="q-pct">0%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    </div>
+    <div class="q-card">
+      <div class="q-num" id="q-num">Q1</div>
+      <div class="q-text" id="q-text"></div>
+      <div class="choices" id="choices"></div>
+    </div>
+  </div>
+
+  <!-- 結果画面 -->
+  <div id="result">
+    <div class="result-card" id="result-card">
+      <span class="stage-emoji" id="stage-emoji"></span>
+      <div class="stage-label" id="stage-label"></div>
+      <div class="stage-name" id="stage-name"></div>
+      <div class="stage-desc" id="stage-desc"></div>
+    </div>
+    <div class="next-card">
+      <div class="next-title">あなたへの次のアクション</div>
+      <ul class="next-list" id="next-list"></ul>
+    </div>
+    <button class="share-btn" id="share-btn">𝕏 結果をシェアする</button>
+    <button class="retry-btn" onclick="retry()">もう一度診断する</button>
+  </div>
+</div>
+
+<script>
+const questions = [
+  {
+    text: '副業について、今どんな状態ですか？',
+    choices: [
+      { text: 'やりたいとは思っているが、まだ何もしていない', score: 1 },
+      { text: 'リサーチや情報収集をしている段階', score: 1 },
+      { text: '何か始めてみたが、続いているか微妙', score: 2 },
+      { text: '定期的に活動できている', score: 3 },
+    ]
+  },
+  {
+    text: '副業で収益（お金・フォロワー・読者など）は発生していますか？',
+    choices: [
+      { text: 'まったくない', score: 1 },
+      { text: 'ほんの少しある（数百円・数人レベル）', score: 2 },
+      { text: 'コンスタントに発生している', score: 3 },
+      { text: '月1万円以上の収益がある', score: 4 },
+    ]
+  },
+  {
+    text: '副業に使える時間は？',
+    choices: [
+      { text: 'ほぼゼロ。時間の作り方がわからない', score: 1 },
+      { text: '週に1〜2時間程度', score: 2 },
+      { text: '毎日30分〜1時間は確保できている', score: 3 },
+      { text: '毎日2時間以上動けている', score: 4 },
+    ]
+  },
+  {
+    text: '「副業をやめたい」と思うことがありますか？',
+    choices: [
+      { text: 'まだ始めていないので何とも言えない', score: 1 },
+      { text: 'よくある。続けられるか不安', score: 2 },
+      { text: 'たまにある。でも続けている', score: 3 },
+      { text: 'ほとんどない。習慣になっている', score: 4 },
+    ]
+  },
+  {
+    text: '自分の副業に「型」（やり方・仕組み）はありますか？',
+    choices: [
+      { text: 'ない。何をすべかわからない', score: 1 },
+      { text: '模索中。試行錯誤している', score: 2 },
+      { text: 'なんとなく決まってきた', score: 3 },
+      { text: '確立されている。再現できる', score: 4 },
+    ]
+  },
+  {
+    text: '副業の「目的」は明確ですか？',
+    choices: [
+      { text: 'なんとなく稼ぎたい、という感じ', score: 1 },
+      { text: '金額目標はあるが、手段が決まっていない', score: 2 },
+      { text: '目的も手段も決まっている', score: 3 },
+      { text: '目的・手段・数値目標が全部決まっている', score: 4 },
+    ]
+  },
+];
+
+const stages = [
+  {
+    emoji: '🌱',
+    label: 'STAGE 1',
+    name: 'まだ迷ってる期',
+    desc: '副業をやりたい気持ちはある。でも「何から始めればいいか」がわからない状態。情報が多すぎて逆に動けないことも。これは普通のこと。',
+    next: [
+      '「完璧な準備」より「小さく始める」を優先する',
+      '1つだけ試してみる（発信・ツール・副業ジャンル）',
+      '情報収集より行動に時間を使う',
+    ],
+    cls: 's1',
+    tweetText: '副業ステージ診断をやってみたら「🌱まだ迷ってる期」でした。\n動き出すタイミングかもしれない。\n#副業 #副業初心者',
+  },
+  {
+    emoji: '🔥',
+    label: 'STAGE 2',
+    name: '動き始めた期',
+    desc: '何かを始めた。でもまだ継続できているか不安で、結果も出ていない。この時期が一番しんどい。でも動いていること自体が価値。',
+    next: [
+      '結果を求めすぎず「続けること」だけを目標にする',
+      '週3本・月12本など小さなルーティンを作る',
+      '同じステージの人と繋がって孤独を減らす',
+    ],
+    cls: 's2',
+    tweetText: '副業ステージ診断をやってみたら「🔥動き始めた期」でした。\n結果よりまず継続。地道にやります。\n#副業 #副業初心者',
+  },
+  {
+    emoji: '📈',
+    label: 'STAGE 3',
+    name: '手応えが出てきた期',
+    desc: '少しずつ反応が出てきた。フォロワーが増えたり、読まれるようになってきた。でもまだ収益には繋がっていない段階。ここから先が本番。',
+    next: [
+      '「自分に反応する人」の属性を分析して投稿を最適化する',
+      '初めての有料コンテンツを試してみる',
+      'エンゲージメントを高めるアクションを毎日5分やる',
+    ],
+    cls: 's3',
+    tweetText: '副業ステージ診断をやってみたら「📈手応えが出てきた期」でした。\nここからが本番。収益化に向けて動きます。\n#副業 #副業初心者',
+  },
+  {
+    emoji: '💰',
+    label: 'STAGE 4',
+    name: '収益が見えてきた期',
+    desc: '収益が発生し始めている。仕組みが見えてきた。あとはスケールするだけ。ここまで来た人は「再現性」を意識するフェーズ。',
+    next: [
+      '収益の柱を1つ増やす（情報販売・コンサル・ツール）',
+      '仕組みを文章化して他の人にも見せられるコンテンツにする',
+      '次のステージの人を引き上げる発信を始める',
+    ],
+    cls: 's4',
+    tweetText: '副業ステージ診断をやってみたら「💰収益が見えてきた期」でした。\nここからスケールするフェーズ。\n#副業 #副業初心者',
+  },
+];
+
+let current = 0;
+let totalScore = 0;
+
+function getStageIndex(score) {
+  if (score <= 8) return 0;
+  if (score <= 13) return 1;
+  if (score <= 18) return 2;
+  return 3;
+}
+
+function render() {
+  const q = questions[current];
+  document.getElementById('q-label').textContent = `Q${current + 1} / ${questions.length}`;
+  document.getElementById('q-pct').textContent = `${Math.round((current / questions.length) * 100)}%`;
+  document.getElementById('progress-fill').style.width = `${(current / questions.length) * 100}%`;
+  document.getElementById('q-num').textContent = `Q${current + 1}`;
+  document.getElementById('q-text').textContent = q.text;
+
+  const choicesEl = document.getElementById('choices');
+  choicesEl.innerHTML = '';
+  q.choices.forEach(c => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = c.text;
+    btn.onclick = () => answer(c.score);
+    choicesEl.appendChild(btn);
+  });
+}
+
+function answer(score) {
+  totalScore += score;
+  current++;
+  if (current >= questions.length) {
+    showResult();
+  } else {
+    render();
+  }
+}
+
+function showResult() {
+  const idx = getStageIndex(totalScore);
+  const stage = stages[idx];
+
+  document.getElementById('quiz').style.display = 'none';
+  document.getElementById('result').style.display = 'block';
+
+  const card = document.getElementById('result-card');
+  card.className = `result-card ${stage.cls}`;
+  document.getElementById('stage-emoji').textContent = stage.emoji;
+  document.getElementById('stage-label').textContent = stage.label;
+  document.getElementById('stage-name').textContent = stage.name;
+  document.getElementById('stage-desc').textContent = stage.desc;
+
+  const nextList = document.getElementById('next-list');
+  nextList.innerHTML = '';
+  stage.next.forEach(n => {
+    const li = document.createElement('li');
+    li.textContent = n;
+    nextList.appendChild(li);
+  });
+
+  const url = `${location.origin}${location.pathname}?stage=${idx + 1}`;
+  document.getElementById('share-btn').onclick = () => {
+    const text = encodeURIComponent(`${stage.tweetText}\n${url}`);
+    window.open(`https://twitter.com/intent/tweet?text=${text}`, '_blank');
+  };
+
+  // URLにステージを反映
+  history.replaceState(null, '', `?stage=${idx + 1}`);
+}
+
+function retry() {
+  current = 0;
+  totalScore = 0;
+  document.getElementById('quiz').style.display = 'block';
+  document.getElementById('result').style.display = 'none';
+  history.replaceState(null, '', location.pathname);
+  render();
+}
+
+// URLパラメータから結果を直接表示
+function checkURLParams() {
+  const params = new URLSearchParams(location.search);
+  const stage = params.get('stage');
+  if (stage && stage >= 1 && stage <= 4) {
+    totalScore = [6, 12, 18, 24][parseInt(stage) - 1]; // ダミースコアで結果表示
+    current = questions.length;
+    const idx = parseInt(stage) - 1;
+    const s = stages[idx];
+
+    document.getElementById('quiz').style.display = 'none';
+    document.getElementById('result').style.display = 'block';
+
+    const card = document.getElementById('result-card');
+    card.className = `result-card ${s.cls}`;
+    document.getElementById('stage-emoji').textContent = s.emoji;
+    document.getElementById('stage-label').textContent = s.label;
+    document.getElementById('stage-name').textContent = s.name;
+    document.getElementById('stage-desc').textContent = s.desc;
+
+    const nextList = document.getElementById('next-list');
+    nextList.innerHTML = '';
+    s.next.forEach(n => {
+      const li = document.createElement('li');
+      li.textContent = n;
+      nextList.appendChild(li);
+    });
+
+    const url = `${location.origin}${location.pathname}?stage=${stage}`;
+    document.getElementById('share-btn').onclick = () => {
+      const text = encodeURIComponent(`${s.tweetText}\n${url}`);
+      window.open(`https://twitter.com/intent/tweet?text=${text}`, '_blank');
+    };
+  }
+}
+
+checkURLParams();
+render();
+</script>
+</body>
+</html>

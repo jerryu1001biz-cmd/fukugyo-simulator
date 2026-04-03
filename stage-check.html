@@ -180,6 +180,7 @@
       <div class="next-title">あなたへの次のアクション</div>
       <ul class="next-list" id="next-list"></ul>
     </div>
+    <div id="stats-box" style="text-align:center;font-size:12px;color:#8892b0;padding:10px 0 4px;min-height:20px;"></div>
     <button class="share-btn" id="share-btn">𝕏 結果をシェアする</button>
     <button class="retry-btn" onclick="retry()">もう一度診断する</button>
     <div style="background:#131929;border:1px solid #1e2a45;border-radius:12px;padding:14px 16px;font-size:13px;color:#8892b0;text-align:center;margin-top:12px;">
@@ -371,6 +372,24 @@ function showResult() {
 
   // URLにステージを反映
   history.replaceState(null, '', `?stage=${idx + 1}`);
+
+  // GASに送信＆集計取得
+  const GAS_URL = 'https://script.google.com/macros/s/AKfycbwt0TcOEE9Cv-HlJWGkrZ6EmclDGLxtHKltnNHmr2E6DzA_iKtvr2-RBcVsv09TNcjx/exec';
+  const typeKey = `stage${idx + 1}`;
+  fetch(GAS_URL, {
+    method: 'POST',
+    body: JSON.stringify({ tool: 'stage-check', type: typeKey }),
+  }).catch(() => {});
+
+  fetch(`${GAS_URL}?tool=stage-check`)
+    .then(r => r.json())
+    .then(data => {
+      const total = data.total || 0;
+      const myCount = (data.counts && data.counts[typeKey]) || 1;
+      const pct = total > 0 ? Math.round((myCount / total) * 100) : 100;
+      const statsEl = document.getElementById('stats-box');
+      if (statsEl) statsEl.textContent = `累計 ${total}人が診断済み｜あなたと同じ結果は全体の ${pct}%`;
+    }).catch(() => {});
 }
 
 function retry() {

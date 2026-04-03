@@ -212,6 +212,7 @@
 
     <button class="share-btn" id="share-btn">𝕏 宣言をシェアする</button>
     <button class="back-btn" onclick="backToList()">← 一覧に戻る</button>
+    <button class="delete-btn" id="delete-btn" style="display:none;width:100%;background:transparent;color:#ef4444;font-size:13px;font-weight:600;padding:10px;border-radius:12px;border:1px solid #7f1d1d;cursor:pointer;margin-top:4px;" onclick="deleteDecl()">この宣言を削除する</button>
   </div>
 </div>
 
@@ -255,6 +256,10 @@ async function declare() {
   }
 
   const [data] = await res.json();
+  // 自分の宣言IDをLocalStorageに保存
+  const myIds = JSON.parse(localStorage.getItem('my_challenges') || '[]');
+  myIds.push(data.id);
+  localStorage.setItem('my_challenges', JSON.stringify(myIds));
   showDone(data);
 }
 
@@ -269,6 +274,14 @@ function showDone(data) {
   document.getElementById('decl-goal').textContent = data.goal;
   document.getElementById('decl-deadline').textContent = data.deadline;
 
+  // 自分の宣言なら削除ボタンを表示
+  const myIds = JSON.parse(localStorage.getItem('my_challenges') || '[]');
+  if (myIds.includes(data.id)) {
+    const delBtn = document.getElementById('delete-btn');
+    delBtn.style.display = 'block';
+    delBtn.dataset.id = data.id;
+  }
+
   const url = `${location.origin}${location.pathname}?id=${data.id}`;
   document.getElementById('share-btn').onclick = () => {
     const text = encodeURIComponent(`副業チャレンジを宣言しました💪\n\n「${data.goal}」\n期限：${data.deadline}\n\n${url}\n\n#副業 #副業初心者`);
@@ -276,6 +289,19 @@ function showDone(data) {
   };
 
   history.replaceState(null, '', `?id=${data.id}`);
+}
+
+async function deleteDecl() {
+  if (!confirm('この宣言を削除しますか？')) return;
+  const id = document.getElementById('delete-btn').dataset.id;
+  await fetch(`${SUPABASE_URL}/rest/v1/challenges?id=eq.${id}`, {
+    method: 'DELETE',
+    headers,
+  });
+  // LocalStorageからも削除
+  const myIds = JSON.parse(localStorage.getItem('my_challenges') || '[]');
+  localStorage.setItem('my_challenges', JSON.stringify(myIds.filter(i => i !== id)));
+  backToList();
 }
 
 function backToList() {

@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>副業タイプ相性診断｜あなたに向いてる副業はどれ？</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0a0f1e;
+      color: #e8eaf6;
+      font-family: 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+      min-height: 100vh;
+      padding: 24px 16px 48px;
+    }
+    .container { width: 100%; max-width: 480px; margin: 0 auto; }
+
+    .header { text-align: center; margin-bottom: 28px; }
+    .badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+    }
+    .header h1 { font-size: 20px; font-weight: 800; color: #fff; line-height: 1.4; }
+    .header p { color: #8892b0; font-size: 13px; margin-top: 6px; }
+
+    .progress-wrap { margin-bottom: 20px; }
+    .progress-label { display: flex; justify-content: space-between; font-size: 12px; color: #8892b0; margin-bottom: 6px; }
+    .progress-bar { width: 100%; height: 4px; background: #1e2a45; border-radius: 2px; }
+    .progress-fill { height: 4px; background: linear-gradient(90deg, #f59e0b, #ef4444); border-radius: 2px; transition: width 0.4s; }
+
+    .q-card { background: #131929; border: 1px solid #1e2a45; border-radius: 16px; padding: 24px; }
+    .q-num { font-size: 11px; color: #f59e0b; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 10px; }
+    .q-text { font-size: 17px; font-weight: 700; color: #fff; line-height: 1.5; margin-bottom: 20px; }
+    .choices { display: flex; flex-direction: column; gap: 10px; }
+    .choice-btn {
+      background: #0d1433;
+      border: 1px solid #1e2a45;
+      color: #c8cef0;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 14px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s;
+      line-height: 1.4;
+    }
+    .choice-btn:hover { border-color: #f59e0b; background: #131f3a; color: #fff; }
+
+    /* 結果 */
+    #result { display: none; }
+    .result-card {
+      border-radius: 20px;
+      padding: 32px 24px;
+      text-align: center;
+      margin-bottom: 20px;
+      border: 2px solid;
+    }
+    .type-emoji { font-size: 56px; margin-bottom: 12px; display: block; }
+    .type-label { font-size: 11px; font-weight: 700; letter-spacing: 0.15em; margin-bottom: 8px; opacity: 0.8; }
+    .type-name { font-size: 26px; font-weight: 900; color: #fff; margin-bottom: 12px; }
+    .type-desc { font-size: 14px; line-height: 1.7; color: #c8cef0; text-align: left; }
+
+    .detail-card {
+      background: #131929;
+      border: 1px solid #1e2a45;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .detail-title { font-size: 12px; color: #8892b0; font-weight: 700; letter-spacing: 0.08em; margin-bottom: 12px; }
+    .detail-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .detail-list li {
+      font-size: 14px; color: #c8cef0;
+      padding-left: 20px; position: relative; line-height: 1.5;
+    }
+    .detail-list li::before { content: '▶'; position: absolute; left: 0; font-size: 10px; color: #f59e0b; top: 3px; }
+
+    .score-bar-wrap { margin-bottom: 20px; }
+    .score-bar-title { font-size: 12px; color: #8892b0; font-weight: 700; letter-spacing: 0.08em; margin-bottom: 12px; }
+    .score-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .score-label { font-size: 12px; color: #c8cef0; width: 60px; flex-shrink: 0; }
+    .score-track { flex: 1; height: 6px; background: #1e2a45; border-radius: 3px; }
+    .score-fill { height: 6px; border-radius: 3px; transition: width 0.6s; }
+    .score-val { font-size: 12px; color: #8892b0; width: 24px; text-align: right; flex-shrink: 0; }
+
+    .share-btn {
+      display: block; width: 100%;
+      background: #1d9bf0; color: #fff;
+      font-size: 15px; font-weight: 800;
+      padding: 16px; border-radius: 12px; border: none;
+      cursor: pointer; margin-bottom: 12px; transition: opacity 0.2s;
+    }
+    .share-btn:hover { opacity: 0.85; }
+    .retry-btn {
+      display: block; width: 100%;
+      background: transparent; color: #8892b0;
+      font-size: 14px; font-weight: 600;
+      padding: 12px; border-radius: 12px;
+      border: 1px solid #1e2a45; cursor: pointer; transition: all 0.2s;
+    }
+    .retry-btn:hover { color: #fff; border-color: #f59e0b; }
+
+    /* タイプ別カラー */
+    .t-hasshin  { background: linear-gradient(135deg, #1a0f0a, #2d1500); border-color: #f97316; }
+    .t-hasshin .type-label { color: #fb923c; }
+    .t-shokunin { background: linear-gradient(135deg, #0a1a0f, #0d2618); border-color: #10b981; }
+    .t-shokunin .type-label { color: #34d399; }
+    .t-consul   { background: linear-gradient(135deg, #0a0f28, #0d1540); border-color: #6366f1; }
+    .t-consul .type-label   { color: #818cf8; }
+    .t-kyoiku   { background: linear-gradient(135deg, #1a1500, #2d2400); border-color: #eab308; }
+    .t-kyoiku .type-label   { color: #fbbf24; }
+    .t-seisaku  { background: linear-gradient(135deg, #180a1a, #2a0d2e); border-color: #a855f7; }
+    .t-seisaku .type-label  { color: #c084fc; }
+    .t-shikumi  { background: linear-gradient(135deg, #001a1a, #002828); border-color: #06b6d4; }
+    .t-shikumi .type-label  { color: #22d3ee; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="badge">TYPE MATCH</div>
+    <h1>あなたに向いてる<br>副業タイプはどれ？</h1>
+    <p>8問で相性のいい副業スタイルを診断します</p>
+  </div>
+
+  <div id="quiz">
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span id="q-label">Q1 / 8</span>
+        <span id="q-pct">0%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    </div>
+    <div class="q-card">
+      <div class="q-num" id="q-num">Q1</div>
+      <div class="q-text" id="q-text"></div>
+      <div class="choices" id="choices"></div>
+    </div>
+  </div>
+
+  <div id="result">
+    <div class="result-card" id="result-card">
+      <span class="type-emoji" id="type-emoji"></span>
+      <div class="type-label" id="type-label"></div>
+      <div class="type-name" id="type-name"></div>
+      <div class="type-desc" id="type-desc"></div>
+    </div>
+
+    <div class="detail-card score-bar-wrap">
+      <div class="score-bar-title">タイプ別スコア</div>
+      <div id="score-bars"></div>
+    </div>
+
+    <div class="detail-card">
+      <div class="detail-title">あなたに向いてる副業の動き方</div>
+      <ul class="detail-list" id="action-list"></ul>
+    </div>
+
+    <button class="share-btn" id="share-btn">𝕏 結果をシェアする</button>
+    <button class="retry-btn" onclick="retry()">もう一度診断する</button>
+  </div>
+</div>
+
+<script>
+// タイプキー: hasshin / shokunin / consul / kyoiku / seisaku / shikumi
+const questions = [
+  {
+    text: '休日の自由な時間、自然とやってしまうことは？',
+    choices: [
+      { text: 'SNSやブログに気づいたことを書く',        scores: { hasshin: 3, kyoiku: 1 } },
+      { text: '好きなことを突き詰めて調べたり作ったりする', scores: { shokunin: 3, seisaku: 1 } },
+      { text: '誰かの相談に乗ったりアドバイスする',      scores: { consul: 3, kyoiku: 1 } },
+      { text: '仕組みやルール・効率化を考える',          scores: { shikumi: 3, consul: 1 } },
+    ]
+  },
+  {
+    text: '副業で「稼ぐ」としたら、どのイメージが一番しっくりくる？',
+    choices: [
+      { text: 'フォロワーが増えて広告収入や案件が入る',  scores: { hasshin: 3 } },
+      { text: '自分のスキルを売ってクライアントから報酬をもらう', scores: { shokunin: 2, consul: 1 } },
+      { text: '相談に乗ってコンサル料をもらう',          scores: { consul: 3 } },
+      { text: 'コンテンツや教材を作って販売する',        scores: { kyoiku: 3, seisaku: 1 } },
+      { text: 'アプリやツールを作って自動で売れる',      scores: { shikumi: 3, seisaku: 1 } },
+    ]
+  },
+  {
+    text: '自分の「強み」として一番当てはまるのは？',
+    choices: [
+      { text: '発信・表現・言語化が得意',                scores: { hasshin: 3, kyoiku: 1 } },
+      { text: '特定の分野で人より詳しい・うまい',        scores: { shokunin: 3 } },
+      { text: '人の話を聞いて本質を見抜くのが得意',      scores: { consul: 3 } },
+      { text: '教えるのが好き・わかりやすく説明できる',  scores: { kyoiku: 3 } },
+      { text: 'デザインや映像など「作る」ことが好き',    scores: { seisaku: 3 } },
+      { text: '効率化・自動化・仕組み作りが得意',        scores: { shikumi: 3 } },
+    ]
+  },
+  {
+    text: '継続できる作業スタイルはどれ？',
+    choices: [
+      { text: '毎日少しずつコンテンツを積み上げる',      scores: { hasshin: 2, kyoiku: 1 } },
+      { text: '集中して1つの成果物を作り込む',          scores: { shokunin: 2, seisaku: 2 } },
+      { text: '人と話したり相談に乗ったりする',          scores: { consul: 3 } },
+      { text: '一度作ったら後は自動で回る仕組みを作る',  scores: { shikumi: 3 } },
+    ]
+  },
+  {
+    text: '副業でしんどくなりそうなのはどれ？',
+    choices: [
+      { text: '毎日発信し続けること',                    scores: { shokunin: 1, shikumi: 1 } },
+      { text: '特定スキルを磨き続けること',              scores: { hasshin: 1, consul: 1 } },
+      { text: '個別の相談・クライアント対応',            scores: { hasshin: 1, seisaku: 1 } },
+      { text: '教材や資料を作り込むこと',                scores: { shokunin: 1, shikumi: 1 } },
+      { text: '仕組みやシステムを考えること',            scores: { kyoiku: 1, seisaku: 1 } },
+    ]
+  },
+  {
+    text: '1ヶ月後、どんな状態になっていたい？',
+    choices: [
+      { text: 'フォロワーが増えて認知されてきた',        scores: { hasshin: 3 } },
+      { text: 'スキルを活かして初めて報酬をもらえた',    scores: { shokunin: 2, consul: 1 } },
+      { text: '誰かの課題を解決して感謝された',          scores: { consul: 2, kyoiku: 1 } },
+      { text: '自分のコンテンツが誰かに役立った',        scores: { kyoiku: 2, seisaku: 1 } },
+      { text: '寝ている間に売上が発生した',              scores: { shikumi: 3, seisaku: 1 } },
+    ]
+  },
+  {
+    text: '副業にかけられる1日あたりの時間は？',
+    choices: [
+      { text: '30分未満',                                scores: { hasshin: 1, shikumi: 2 } },
+      { text: '30分〜1時間',                            scores: { hasshin: 2, kyoiku: 1 } },
+      { text: '1〜2時間',                               scores: { shokunin: 2, consul: 1, seisaku: 1 } },
+      { text: '2時間以上',                              scores: { shokunin: 1, consul: 2, seisaku: 2 } },
+    ]
+  },
+  {
+    text: '今の自分に一番近いのは？',
+    choices: [
+      { text: '発信したいことがたくさんある',            scores: { hasshin: 3 } },
+      { text: '特定分野で人より詳しいことがある',        scores: { shokunin: 3 } },
+      { text: '人の悩みを聞いてあげたい',                scores: { consul: 3 } },
+      { text: '誰かに何かを教えるのが好き',              scores: { kyoiku: 3 } },
+      { text: 'ものを作ること自体が楽しい',              scores: { seisaku: 3 } },
+      { text: '効率よく稼げる仕組みを作りたい',          scores: { shikumi: 3 } },
+    ]
+  },
+];
+
+const types = {
+  hasshin: {
+    key: 'hasshin',
+    emoji: '🔥',
+    label: 'TYPE A',
+    name: '発信者型',
+    cls: 't-hasshin',
+    desc: '自分の体験・考え・知識を発信することで価値を生む。フォロワーが資産になる。継続発信が得意な人に向いている。',
+    actions: [
+      'X・note・YouTubeなど1つのプラットフォームに集中する',
+      '毎日1投稿を最小単位にして習慣化する',
+      'まず100日続けることだけを目標にする',
+    ],
+    tweetText: '副業タイプ相性診断をやってみたら「🔥発信者型」でした。\n自分の体験を発信することで価値を生むタイプ。\n#副業 #副業初心者',
+    color: '#f97316',
+  },
+  shokunin: {
+    key: 'shokunin',
+    emoji: '🔧',
+    label: 'TYPE B',
+    name: '職人型',
+    cls: 't-shokunin',
+    desc: '特定スキルを磨いてクライアントから報酬をもらう。ライティング・デザイン・プログラミングなど専門性が武器。',
+    actions: [
+      'クラウドワークス・ランサーズで実績を積む',
+      '得意分野を1つ絞ってポートフォリオを作る',
+      '単価を上げるため実績と紹介文に投資する',
+    ],
+    tweetText: '副業タイプ相性診断をやってみたら「🔧職人型」でした。\n特定スキルを磨いて専門性で稼ぐタイプ。\n#副業 #副業初心者',
+    color: '#10b981',
+  },
+  consul: {
+    key: 'consul',
+    emoji: '💬',
+    label: 'TYPE C',
+    name: 'コンサル型',
+    cls: 't-consul',
+    desc: '人の悩みを聞いて課題を解決するのが強み。単価が高く、少数のクライアントで稼げる。信頼構築が先決。',
+    actions: [
+      '得意分野での発信で「詳しい人」として認知される',
+      'まずは無料や格安で実績作りから始める',
+      'LINE・Xのリプ経由でDM相談の流れを作る',
+    ],
+    tweetText: '副業タイプ相性診断をやってみたら「💬コンサル型」でした。\n人の課題を解決することで高単価を目指すタイプ。\n#副業 #副業初心者',
+    color: '#6366f1',
+  },
+  kyoiku: {
+    key: 'kyoiku',
+    emoji: '📚',
+    label: 'TYPE D',
+    name: '教育型',
+    cls: 't-kyoiku',
+    desc: '知識・ノウハウをコンテンツ化して販売する。note・Udemy・スクール運営など。教えることが好きな人に向いている。',
+    actions: [
+      'まずnoteで無料記事を書いて反応を確認する',
+      '「読んで理解できた」体験を設計することが核心',
+      '有料記事1本を最初の目標にする',
+    ],
+    tweetText: '副業タイプ相性診断をやってみたら「📚教育型」でした。\n知識をコンテンツ化して販売するタイプ。\n#副業 #副業初心者',
+    color: '#eab308',
+  },
+  seisaku: {
+    key: 'seisaku',
+    emoji: '🎨',
+    label: 'TYPE E',
+    name: '制作型',
+    cls: 't-seisaku',
+    desc: 'デザイン・動画・音楽・イラストなど「作る」ことで価値を生む。作品そのものが資産になる。',
+    actions: [
+      'ポートフォリオサイトを作って作品を公開する',
+      'ストックサービス（Adobe Stock等）で販売を試す',
+      'SNSで制作過程を発信して認知を広げる',
+    ],
+    tweetText: '副業タイプ相性診断をやってみたら「🎨制作型」でした。\n作品を作ることで価値を生み出すタイプ。\n#副業 #副業初心者',
+    color: '#a855f7',
+  },
+  shikumi: {
+    key: 'shikumi',
+    emoji: '⚙️',
+    label: 'TYPE F',
+    name: '仕組み型',
+    cls: 't-shikumi',
+    desc: '一度作ったら自動で回る仕組みを好む。ツール・アフィリエイト・サブスク型のビジネスに向いている。',
+    actions: [
+      'ツールやシステムを作って公開・販売する',
+      'アフィリエイトで仕組みを先に作る',
+      '労働時間と収入が比例しない構造を設計する',
+    ],
+    tweetText: '副業タイプ相性診断をやってみたら「⚙️仕組み型」でした。\n自動で回る仕組みを作って稼ぐタイプ。\n#副業 #副業初心者',
+    color: '#06b6d4',
+  },
+};
+
+const typeOrder = ['hasshin', 'shokunin', 'consul', 'kyoiku', 'seisaku', 'shikumi'];
+const typeNames = { hasshin: '発信者型', shokunin: '職人型', consul: 'コンサル型', kyoiku: '教育型', seisaku: '制作型', shikumi: '仕組み型' };
+
+let current = 0;
+let scores = { hasshin: 0, shokunin: 0, consul: 0, kyoiku: 0, seisaku: 0, shikumi: 0 };
+
+function render() {
+  const q = questions[current];
+  document.getElementById('q-label').textContent = `Q${current + 1} / ${questions.length}`;
+  document.getElementById('q-pct').textContent = `${Math.round((current / questions.length) * 100)}%`;
+  document.getElementById('progress-fill').style.width = `${(current / questions.length) * 100}%`;
+  document.getElementById('q-num').textContent = `Q${current + 1}`;
+  document.getElementById('q-text').textContent = q.text;
+
+  const choicesEl = document.getElementById('choices');
+  choicesEl.innerHTML = '';
+  q.choices.forEach(c => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = c.text;
+    btn.onclick = () => answer(c.scores);
+    choicesEl.appendChild(btn);
+  });
+}
+
+function answer(s) {
+  Object.entries(s).forEach(([k, v]) => { scores[k] += v; });
+  current++;
+  if (current >= questions.length) showResult();
+  else render();
+}
+
+function getTopType() {
+  return typeOrder.reduce((a, b) => scores[a] >= scores[b] ? a : b);
+}
+
+function showResult(fromURL) {
+  const topKey = fromURL || getTopType();
+  const t = types[topKey];
+  const max = Math.max(...Object.values(scores)) || 1;
+
+  document.getElementById('quiz').style.display = 'none';
+  document.getElementById('result').style.display = 'block';
+
+  const card = document.getElementById('result-card');
+  card.className = `result-card ${t.cls}`;
+  document.getElementById('type-emoji').textContent = t.emoji;
+  document.getElementById('type-label').textContent = t.label;
+  document.getElementById('type-name').textContent = t.name;
+  document.getElementById('type-desc').textContent = t.desc;
+
+  // スコアバー
+  const barsEl = document.getElementById('score-bars');
+  barsEl.innerHTML = '';
+  typeOrder.forEach(k => {
+    const val = scores[k];
+    const pct = Math.round((val / max) * 100);
+    const row = document.createElement('div');
+    row.className = 'score-row';
+    row.innerHTML = `
+      <div class="score-label">${typeNames[k]}</div>
+      <div class="score-track"><div class="score-fill" style="width:${pct}%;background:${types[k].color}"></div></div>
+      <div class="score-val">${val}</div>
+    `;
+    barsEl.appendChild(row);
+  });
+
+  // アクション
+  const actEl = document.getElementById('action-list');
+  actEl.innerHTML = '';
+  t.actions.forEach(a => {
+    const li = document.createElement('li');
+    li.textContent = a;
+    actEl.appendChild(li);
+  });
+
+  const url = `${location.origin}${location.pathname}?type=${topKey}`;
+  document.getElementById('share-btn').onclick = () => {
+    const text = encodeURIComponent(`${t.tweetText}\n${url}`);
+    window.open(`https://twitter.com/intent/tweet?text=${text}`, '_blank');
+  };
+
+  history.replaceState(null, '', `?type=${topKey}`);
+}
+
+function retry() {
+  current = 0;
+  scores = { hasshin: 0, shokunin: 0, consul: 0, kyoiku: 0, seisaku: 0, shikumi: 0 };
+  document.getElementById('quiz').style.display = 'block';
+  document.getElementById('result').style.display = 'none';
+  history.replaceState(null, '', location.pathname);
+  render();
+}
+
+// URLパラメータから直接表示
+const params = new URLSearchParams(location.search);
+const typeParam = params.get('type');
+if (typeParam && types[typeParam]) {
+  // ダミースコアで表示
+  scores[typeParam] = 10;
+  current = questions.length;
+  showResult(typeParam);
+} else {
+  render();
+}
+</script>
+</body>
+</html>

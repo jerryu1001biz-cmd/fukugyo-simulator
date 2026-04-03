@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>副業プロフィールカード</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0a0f1e;
+      color: #e8eaf6;
+      font-family: 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+      min-height: 100vh;
+      padding: 24px 16px 48px;
+    }
+    .container { width: 100%; max-width: 480px; margin: 0 auto; }
+
+    .header { text-align: center; margin-bottom: 28px; }
+    .badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #0ea5e9, #6366f1);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+    }
+    .header h1 { font-size: 20px; font-weight: 800; color: #fff; line-height: 1.4; }
+    .header p { color: #8892b0; font-size: 13px; margin-top: 6px; }
+
+    /* フォーム */
+    .form-card {
+      background: #131929;
+      border: 1px solid #1e2a45;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+    .form-section-title { font-size: 12px; color: #8892b0; font-weight: 700; letter-spacing: 0.08em; margin-bottom: 14px; }
+
+    .diagnosis-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .diagnosis-chip {
+      flex: 1;
+      background: #0d1433;
+      border: 1px solid #1e2a45;
+      border-radius: 10px;
+      padding: 10px 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .diagnosis-chip.filled { border-color: #6366f1; background: #131f3a; }
+    .diagnosis-chip .chip-label { font-size: 10px; color: #8892b0; margin-bottom: 4px; }
+    .diagnosis-chip .chip-val { font-size: 13px; font-weight: 700; color: #fff; }
+    .diagnosis-chip .chip-link { font-size: 10px; color: #6366f1; margin-top: 4px; }
+
+    .field { margin-bottom: 16px; }
+    .field label { display: block; font-size: 12px; color: #8892b0; font-weight: 700; margin-bottom: 6px; }
+    .field input, .field textarea {
+      width: 100%;
+      background: #0d1433;
+      border: 1px solid #1e2a45;
+      color: #e8eaf6;
+      font-size: 14px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      outline: none;
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+    .field input:focus, .field textarea:focus { border-color: #6366f1; }
+    .field textarea { resize: none; height: 72px; line-height: 1.5; }
+
+    .submit-btn {
+      display: block; width: 100%;
+      background: linear-gradient(135deg, #0ea5e9, #6366f1);
+      color: #fff; font-size: 15px; font-weight: 800;
+      padding: 16px; border-radius: 12px; border: none;
+      cursor: pointer; transition: opacity 0.2s;
+    }
+    .submit-btn:hover { opacity: 0.85; }
+    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* カード */
+    #card-section { display: none; }
+    .profile-card {
+      background: linear-gradient(135deg, #0a1628, #0d1f3c);
+      border: 2px solid #6366f1;
+      border-radius: 20px;
+      padding: 28px 24px;
+      margin-bottom: 16px;
+    }
+    .card-header { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
+    .card-avatar {
+      width: 52px; height: 52px;
+      background: linear-gradient(135deg, #6366f1, #0ea5e9);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; flex-shrink: 0;
+    }
+    .card-name { font-size: 17px; font-weight: 800; color: #fff; }
+    .card-date { font-size: 11px; color: #8892b0; margin-top: 2px; }
+
+    .card-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .card-tag {
+      background: #131f3a;
+      border: 1px solid #1e2a45;
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #c8cef0;
+    }
+    .card-tag.stage { border-color: #6366f1; color: #818cf8; }
+    .card-tag.type { border-color: #10b981; color: #34d399; }
+
+    .card-message {
+      background: #0d1433;
+      border-left: 3px solid #6366f1;
+      border-radius: 0 10px 10px 0;
+      padding: 12px 14px;
+      font-size: 14px;
+      color: #e8eaf6;
+      line-height: 1.6;
+    }
+
+    .share-btn {
+      display: block; width: 100%;
+      background: #1d9bf0; color: #fff;
+      font-size: 15px; font-weight: 800;
+      padding: 16px; border-radius: 12px; border: none;
+      cursor: pointer; margin-bottom: 12px; transition: opacity 0.2s;
+    }
+    .share-btn:hover { opacity: 0.85; }
+
+    .retry-btn {
+      display: block; width: 100%;
+      background: transparent; color: #8892b0;
+      font-size: 14px; font-weight: 600;
+      padding: 12px; border-radius: 12px;
+      border: 1px solid #1e2a45; cursor: pointer;
+      margin-bottom: 16px; transition: all 0.2s;
+    }
+    .retry-btn:hover { color: #fff; border-color: #6366f1; }
+
+    .link-card {
+      background: #131929; border: 1px solid #1e2a45;
+      border-radius: 12px; padding: 14px 16px;
+      font-size: 13px; color: #8892b0; text-align: center;
+    }
+    .link-card a { color: #6366f1; font-weight: 700; text-decoration: none; }
+    .link-card a + a::before { content: '｜'; margin: 0 6px; color: #1e2a45; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="badge">PROFILE CARD</div>
+    <h1>副業プロフィールカード</h1>
+    <p>診断結果をまとめてシェアしよう</p>
+  </div>
+
+  <!-- フォーム -->
+  <div id="form-section">
+    <div class="form-card">
+      <div class="form-section-title">診断結果（タップして診断へ）</div>
+      <div class="diagnosis-row">
+        <div class="diagnosis-chip" id="chip-stage" onclick="goToStage()">
+          <div class="chip-label">ステージ</div>
+          <div class="chip-val" id="chip-stage-val">未診断</div>
+          <div class="chip-link">→ 診断する</div>
+        </div>
+        <div class="diagnosis-chip" id="chip-type" onclick="goToType()">
+          <div class="chip-label">タイプ</div>
+          <div class="chip-val" id="chip-type-val">未診断</div>
+          <div class="chip-link">→ 診断する</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>ニックネーム</label>
+        <input type="text" id="nickname" placeholder="例：ハル｜AI副業の実験記録" maxlength="30" />
+      </div>
+
+      <div class="field">
+        <label>ひと言（副業への意気込みなど）</label>
+        <textarea id="message" placeholder="例：コード書けない30代が、AIで副業を作る実験中です。"></textarea>
+      </div>
+
+      <button class="submit-btn" id="submit-btn" onclick="createCard()">カードを作る ✨</button>
+    </div>
+
+    <div class="link-card">
+      <a href="./stage-check.html">ステージ診断</a><a href="./type-match.html">タイプ診断</a><a href="./income-sim.html">収益シミュレーター</a>
+    </div>
+  </div>
+
+  <!-- カード表示 -->
+  <div id="card-section">
+    <div class="profile-card" id="profile-card">
+      <div class="card-header">
+        <div class="card-avatar" id="card-avatar">🔥</div>
+        <div>
+          <div class="card-name" id="card-name"></div>
+          <div class="card-date" id="card-date"></div>
+        </div>
+      </div>
+      <div class="card-tags" id="card-tags"></div>
+      <div class="card-message" id="card-message"></div>
+    </div>
+
+    <button class="share-btn" id="share-btn">𝕏 カードをシェアする</button>
+    <button class="retry-btn" onclick="resetForm()">← 作り直す</button>
+
+    <div class="link-card">
+      <a href="./challenge.html">副業チャレンジ宣言</a><a href="./stage-check.html">ステージ診断</a>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://udqmvhuhrdkuqppvrodn.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_49adCp-DwNYafQDl7NzS9w_koDBqhDz';
+const headers = {
+  'apikey': SUPABASE_KEY,
+  'Authorization': `Bearer ${SUPABASE_KEY}`,
+  'Content-Type': 'application/json',
+  'Prefer': 'return=representation',
+};
+
+const stageNames = { stage1: '🌱まだ迷ってる期', stage2: '🔥動き始めた期', stage3: '📈手応えが出てきた期', stage4: '💰収益が見えてきた期' };
+const typeNames  = { hasshin: '🔥発信者型', shokunin: '🔧職人型', consul: '💬コンサル型', kyoiku: '📚教育型', seisaku: '🎨制作型', shikumi: '⚙️仕組み型' };
+const typeEmojis = { hasshin: '🔥', shokunin: '🔧', consul: '💬', kyoiku: '📚', seisaku: '🎨', shikumi: '⚙️' };
+
+let currentStage = null;
+let currentType = null;
+
+function initFromParams() {
+  const p = new URLSearchParams(location.search);
+  const stage = p.get('stage');
+  const type = p.get('type');
+  const id = p.get('id');
+
+  if (id) { loadCard(id); return; }
+
+  if (stage && stageNames['stage' + stage]) {
+    currentStage = 'stage' + stage;
+    const chip = document.getElementById('chip-stage');
+    chip.classList.add('filled');
+    document.getElementById('chip-stage-val').textContent = stageNames['stage' + stage];
+  }
+  if (type && typeNames[type]) {
+    currentType = type;
+    const chip = document.getElementById('chip-type');
+    chip.classList.add('filled');
+    document.getElementById('chip-type-val').textContent = typeNames[type];
+  }
+}
+
+function goToStage() {
+  const back = encodeURIComponent(location.href.split('?')[0] + (currentType ? `?type=${currentType}` : ''));
+  location.href = `./stage-check.html`;
+}
+function goToType() {
+  location.href = `./type-match.html`;
+}
+
+async function createCard() {
+  const nickname = document.getElementById('nickname').value.trim();
+  const message  = document.getElementById('message').value.trim();
+  if (!nickname || !message) { alert('ニックネームとひと言を入力してください'); return; }
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true; btn.textContent = '作成中...';
+
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/profiles`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ stage: currentStage, type: currentType, nickname, message }),
+  });
+  const [data] = await res.json();
+  showCard(data);
+  history.replaceState(null, '', `?id=${data.id}`);
+}
+
+function showCard(data) {
+  document.getElementById('form-section').style.display = 'none';
+  document.getElementById('card-section').style.display = 'block';
+
+  const emoji = data.type ? (typeEmojis[data.type] || '✨') : '✨';
+  document.getElementById('card-avatar').textContent = emoji;
+  document.getElementById('card-name').textContent = data.nickname;
+  const d = new Date(data.created_at);
+  document.getElementById('card-date').textContent = `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日 作成`;
+
+  const tags = document.getElementById('card-tags');
+  tags.innerHTML = '';
+  if (data.stage && stageNames[data.stage]) {
+    const t = document.createElement('span');
+    t.className = 'card-tag stage';
+    t.textContent = stageNames[data.stage];
+    tags.appendChild(t);
+  }
+  if (data.type && typeNames[data.type]) {
+    const t = document.createElement('span');
+    t.className = 'card-tag type';
+    t.textContent = typeNames[data.type];
+    tags.appendChild(t);
+  }
+
+  document.getElementById('card-message').textContent = data.message;
+
+  const url = `${location.origin}${location.pathname}?id=${data.id}`;
+  const stageName = data.stage ? stageNames[data.stage] : '';
+  const typeName  = data.type  ? typeNames[data.type]   : '';
+  const tweetText = `副業プロフィールカードを作りました✨\n${stageName}｜${typeName}\n「${data.message}」\n${url}\n#副業 #ClaudeCode`;
+  document.getElementById('share-btn').onclick = () => {
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`, '_blank');
+  };
+}
+
+async function loadCard(id) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${id}&limit=1`, { headers });
+  const data = await res.json();
+  if (data.length) showCard(data[0]);
+}
+
+function resetForm() {
+  document.getElementById('card-section').style.display = 'none';
+  document.getElementById('form-section').style.display = 'block';
+  document.getElementById('submit-btn').disabled = false;
+  document.getElementById('submit-btn').textContent = 'カードを作る ✨';
+  history.replaceState(null, '', location.pathname);
+}
+
+initFromParams();
+</script>
+</body>
+</html>

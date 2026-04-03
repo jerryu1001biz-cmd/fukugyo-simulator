@@ -183,6 +183,7 @@
     <div id="stats-box" style="text-align:center;font-size:12px;color:#8892b0;padding:10px 0 4px;min-height:20px;"></div>
     <button class="share-btn" id="share-btn">𝕏 結果をシェアする</button>
     <button class="retry-btn" onclick="retry()">もう一度診断する</button>
+    <button id="profile-btn" onclick="goToProfile()" style="display:none;width:100%;background:linear-gradient(135deg,#0ea5e9,#6366f1);color:#fff;font-size:14px;font-weight:800;padding:14px;border-radius:12px;border:none;cursor:pointer;margin-top:4px;">✨ プロフィールカードを作る</button>
     <div style="background:#131929;border:1px solid #1e2a45;border-radius:12px;padding:14px 16px;font-size:13px;color:#8892b0;text-align:center;margin-top:12px;">
       自分のタイプを知る → <a href="./type-match.html" style="color:#6366f1;font-weight:700;text-decoration:none;">副業タイプ相性診断</a><br>
       月収を試算する → <a href="./income-sim.html" style="color:#6366f1;font-weight:700;text-decoration:none;">タイプ別収益シミュレーター</a>
@@ -372,6 +373,8 @@ function showResult() {
 
   // URLにステージを反映
   history.replaceState(null, '', `?stage=${idx + 1}`);
+  const pb = document.getElementById('profile-btn');
+  if (pb) { pb.style.display = 'block'; pb.dataset.stage = idx + 1; }
 
   // GASに送信＆集計取得
   const GAS_URL = 'https://script.google.com/macros/s/AKfycbwt0TcOEE9Cv-HlJWGkrZ6EmclDGLxtHKltnNHmr2E6DzA_iKtvr2-RBcVsv09TNcjx/exec';
@@ -435,6 +438,11 @@ function checkURLParams() {
       window.open(`https://twitter.com/intent/tweet?text=${text}`, '_blank');
     };
   }
+}
+
+function goToProfile() {
+  const stage = document.getElementById('profile-btn').dataset.stage;
+  location.href = `./profile-card.html?stage=${stage}`;
 }
 
 checkURLParams();

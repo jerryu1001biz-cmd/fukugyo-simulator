@@ -342,7 +342,7 @@ async function loadList() {
     const date = new Date(d.created_at);
     const dateStr = `${date.getMonth()+1}/${date.getDate()}`;
     return `
-      <div class="decl-item">
+      <div class="decl-item" onclick="location.href='?id=${d.id}'" style="cursor:pointer;">
         <div class="decl-item-header">
           <span class="decl-item-name">${esc(d.nickname)}</span>
           <span class="decl-item-type">${esc(d.type)}</span>

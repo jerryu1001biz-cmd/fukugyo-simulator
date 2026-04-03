@@ -193,6 +193,11 @@
         <textarea id="message" placeholder="例：コード書けない30代が、AIで副業を作る実験中です。"></textarea>
       </div>
 
+      <div class="field">
+        <label>チャレンジ宣言（任意）</label>
+        <input type="text" id="challenge-text" placeholder="例：6月末まで毎日発信を続ける" maxlength="60" />
+      </div>
+
       <button class="submit-btn" id="submit-btn" onclick="createCard()">カードを作る ✨</button>
     </div>
 
@@ -243,23 +248,22 @@ let currentType = null;
 
 function initFromParams() {
   const p = new URLSearchParams(location.search);
-  const stage = p.get('stage');
-  const type = p.get('type');
   const id = p.get('id');
-
   if (id) { loadCard(id); return; }
 
-  if (stage && stageNames['stage' + stage]) {
-    currentStage = 'stage' + stage;
-    const chip = document.getElementById('chip-stage');
-    chip.classList.add('filled');
-    document.getElementById('chip-stage-val').textContent = stageNames['stage' + stage];
+  // URLパラメータ優先、なければLocalStorage
+  const stageParam = p.get('stage') ? 'stage' + p.get('stage') : localStorage.getItem('diag_stage');
+  const typeParam  = p.get('type')  || localStorage.getItem('diag_type');
+
+  if (stageParam && stageNames[stageParam]) {
+    currentStage = stageParam;
+    document.getElementById('chip-stage').classList.add('filled');
+    document.getElementById('chip-stage-val').textContent = stageNames[stageParam];
   }
-  if (type && typeNames[type]) {
-    currentType = type;
-    const chip = document.getElementById('chip-type');
-    chip.classList.add('filled');
-    document.getElementById('chip-type-val').textContent = typeNames[type];
+  if (typeParam && typeNames[typeParam]) {
+    currentType = typeParam;
+    document.getElementById('chip-type').classList.add('filled');
+    document.getElementById('chip-type-val').textContent = typeNames[typeParam];
   }
 }
 
@@ -279,10 +283,11 @@ async function createCard() {
   const btn = document.getElementById('submit-btn');
   btn.disabled = true; btn.textContent = '作成中...';
 
+  const challengeText = document.getElementById('challenge-text').value.trim();
   const res = await fetch(`${SUPABASE_URL}/rest/v1/profiles`, {
     method: 'POST',
     headers,
-    body: JSON.stringify({ stage: currentStage, type: currentType, nickname, message }),
+    body: JSON.stringify({ stage: currentStage, type: currentType, nickname, message, challenge: challengeText || null }),
   });
   const [data] = await res.json();
   showCard(data);
@@ -316,10 +321,22 @@ function showCard(data) {
 
   document.getElementById('card-message').textContent = data.message;
 
+  // チャレンジ宣言
+  const existingChallenge = document.getElementById('card-challenge');
+  if (existingChallenge) existingChallenge.remove();
+  if (data.challenge) {
+    const el = document.createElement('div');
+    el.id = 'card-challenge';
+    el.style.cssText = 'margin-top:12px;background:#0d1433;border-left:3px solid #7c3aed;border-radius:0 10px 10px 0;padding:10px 14px;font-size:13px;color:#c084fc;';
+    el.innerHTML = `💪 <strong>宣言：</strong>${esc(data.challenge)}`;
+    document.getElementById('card-message').after(el);
+  }
+
   const url = `${location.origin}${location.pathname}?id=${data.id}`;
   const stageName = data.stage ? stageNames[data.stage] : '';
   const typeName  = data.type  ? typeNames[data.type]   : '';
-  const tweetText = `副業プロフィールカードを作りました✨\n${stageName}｜${typeName}\n「${data.message}」\n${url}\n#副業 #ClaudeCode`;
+  const challengeLine = data.challenge ? `\n💪 ${data.challenge}` : '';
+  const tweetText = `副業プロフィールカードを作りました✨\n${stageName}｜${typeName}\n「${data.message}」${challengeLine}\n${url}\n#副業 #ClaudeCode`;
   document.getElementById('share-btn').onclick = () => {
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`, '_blank');
   };
@@ -337,6 +354,10 @@ function resetForm() {
   document.getElementById('submit-btn').disabled = false;
   document.getElementById('submit-btn').textContent = 'カードを作る ✨';
   history.replaceState(null, '', location.pathname);
+}
+
+function esc(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 initFromParams();

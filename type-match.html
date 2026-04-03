@@ -435,6 +435,7 @@ function showResult(fromURL) {
   };
 
   history.replaceState(null, '', `?type=${topKey}`);
+  if (!fromURL) localStorage.setItem('diag_type', topKey);
   const pb = document.getElementById('profile-btn');
   if (pb) { pb.style.display = 'block'; pb.dataset.type = topKey; }
 

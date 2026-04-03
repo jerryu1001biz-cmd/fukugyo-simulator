@@ -373,6 +373,7 @@ function showResult() {
 
   // URLにステージを反映
   history.replaceState(null, '', `?stage=${idx + 1}`);
+  localStorage.setItem('diag_stage', `stage${idx + 1}`);
   const pb = document.getElementById('profile-btn');
   if (pb) { pb.style.display = 'block'; pb.dataset.stage = idx + 1; }
 

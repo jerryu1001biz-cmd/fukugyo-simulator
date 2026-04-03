@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>副業収益シミュレーター｜タイプ別</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0a0f1e;
+      color: #e8eaf6;
+      font-family: 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+      min-height: 100vh;
+      padding: 24px 16px 48px;
+    }
+    .container { width: 100%; max-width: 480px; margin: 0 auto; }
+
+    .header { text-align: center; margin-bottom: 28px; }
+    .badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #10b981, #06b6d4);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+    }
+    .header h1 { font-size: 20px; font-weight: 800; color: #fff; line-height: 1.4; }
+    .header p { color: #8892b0; font-size: 13px; margin-top: 6px; }
+
+    /* タイプ選択 */
+    #type-select { margin-bottom: 8px; }
+    .type-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .type-btn {
+      background: #131929;
+      border: 1px solid #1e2a45;
+      color: #c8cef0;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 14px 10px;
+      border-radius: 12px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+      line-height: 1.4;
+    }
+    .type-btn:hover { border-color: #10b981; color: #fff; background: #131f3a; }
+    .type-btn .t-emoji { font-size: 24px; display: block; margin-bottom: 4px; }
+
+    /* シミュレーター本体 */
+    #simulator { display: none; }
+
+    .type-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #131929;
+      border: 1px solid #1e2a45;
+      border-radius: 16px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+    }
+    .type-header-emoji { font-size: 36px; }
+    .type-header-info {}
+    .type-header-label { font-size: 11px; color: #8892b0; font-weight: 700; letter-spacing: 0.08em; }
+    .type-header-name { font-size: 18px; font-weight: 800; color: #fff; }
+    .change-type-btn {
+      margin-left: auto;
+      background: transparent;
+      border: 1px solid #1e2a45;
+      color: #8892b0;
+      font-size: 12px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .change-type-btn:hover { color: #fff; border-color: #10b981; }
+
+    /* 結果表示 */
+    .result-box {
+      background: linear-gradient(135deg, #0a1628, #0d2137);
+      border: 2px solid #10b981;
+      border-radius: 16px;
+      padding: 24px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .result-label { font-size: 12px; color: #34d399; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 8px; }
+    .result-amount { font-size: 42px; font-weight: 900; color: #fff; margin-bottom: 4px; }
+    .result-sub { font-size: 13px; color: #8892b0; }
+
+    /* スライダーカード */
+    .slider-card {
+      background: #131929;
+      border: 1px solid #1e2a45;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 12px;
+    }
+    .slider-row { margin-bottom: 16px; }
+    .slider-row:last-child { margin-bottom: 0; }
+    .slider-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      font-weight: 700;
+      color: #c8cef0;
+      margin-bottom: 8px;
+    }
+    .slider-val { color: #10b981; }
+    input[type=range] {
+      width: 100%;
+      height: 4px;
+      -webkit-appearance: none;
+      background: #1e2a45;
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: #10b981;
+      cursor: pointer;
+    }
+
+    /* 内訳 */
+    .breakdown {
+      background: #131929;
+      border: 1px solid #1e2a45;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .breakdown-title { font-size: 12px; color: #8892b0; font-weight: 700; letter-spacing: 0.08em; margin-bottom: 12px; }
+    .bd-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: #c8cef0;
+      padding: 6px 0;
+      border-bottom: 1px solid #1e2a45;
+    }
+    .bd-row:last-child { border-bottom: none; }
+    .bd-val { color: #fff; font-weight: 700; }
+
+    .share-btn {
+      display: block; width: 100%;
+      background: #1d9bf0; color: #fff;
+      font-size: 15px; font-weight: 800;
+      padding: 16px; border-radius: 12px; border: none;
+      cursor: pointer; margin-bottom: 12px; transition: opacity 0.2s;
+    }
+    .share-btn:hover { opacity: 0.85; }
+
+    .link-card {
+      background: #131929;
+      border: 1px solid #1e2a45;
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-size: 13px;
+      color: #8892b0;
+      text-align: center;
+    }
+    .link-card a { color: #10b981; text-decoration: none; font-weight: 700; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="badge">INCOME SIM</div>
+    <h1>タイプ別<br>副業収益シミュレーター</h1>
+    <p>あなたのタイプに合った計算式で月収を試算</p>
+  </div>
+
+  <!-- タイプ選択 -->
+  <div id="type-select">
+    <div class="type-grid" id="type-grid"></div>
+    <div class="link-card">
+      タイプがわからない方は<br>
+      <a href="./type-match.html">→ 副業タイプ相性診断へ</a>
+    </div>
+  </div>
+
+  <!-- シミュレーター -->
+  <div id="simulator">
+    <div class="type-header">
+      <div class="type-header-emoji" id="sim-emoji"></div>
+      <div class="type-header-info">
+        <div class="type-header-label" id="sim-label"></div>
+        <div class="type-header-name" id="sim-name"></div>
+      </div>
+      <button class="change-type-btn" onclick="showTypeSelect()">変更</button>
+    </div>
+
+    <div class="result-box">
+      <div class="result-label">月収シミュレーション</div>
+      <div class="result-amount" id="result-amount">¥0</div>
+      <div class="result-sub" id="result-sub"></div>
+    </div>
+
+    <div class="slider-card" id="slider-card"></div>
+
+    <div class="breakdown" id="breakdown"></div>
+
+    <button class="share-btn" id="share-btn">𝕏 この結果をシェアする</button>
+
+    <div class="link-card">
+      今どのステージ？ <a href="./stage-check.html">→ 副業ステージ診断</a>
+    </div>
+  </div>
+</div>
+
+<script>
+const types = {
+  hasshin: {
+    emoji: '🔥', label: 'TYPE A', name: '発信者型',
+    sliders: [
+      { key: 'followers', label: 'フォロワー数', min: 100, max: 10000, step: 100, default: 500, unit: '人', fmt: v => v.toLocaleString() + '人' },
+      { key: 'rate',      label: '案件単価（1本）', min: 1000, max: 100000, step: 1000, default: 10000, unit: '円', fmt: v => '¥' + v.toLocaleString() },
+      { key: 'cases',     label: '月の案件数', min: 0, max: 10, step: 1, default: 1, unit: '本', fmt: v => v + '本' },
+    ],
+    calc: (v) => {
+      const income = v.rate * v.cases;
+      const rows = [
+        { label: '案件単価', val: '¥' + v.rate.toLocaleString() },
+        { label: '月案件数', val: v.cases + '本' },
+        { label: '月収', val: '¥' + income.toLocaleString() },
+      ];
+      const sub = `フォロワー${v.followers.toLocaleString()}人規模の目安`;
+      return { income, rows, sub };
+    },
+  },
+  shokunin: {
+    emoji: '🔧', label: 'TYPE B', name: '職人型',
+    sliders: [
+      { key: 'hours',  label: '月稼働時間', min: 5, max: 80, step: 5, default: 20, unit: '時間', fmt: v => v + '時間' },
+      { key: 'price',  label: '時間単価', min: 500, max: 10000, step: 500, default: 2000, unit: '円', fmt: v => '¥' + v.toLocaleString() },
+    ],
+    calc: (v) => {
+      const income = v.hours * v.price;
+      const rows = [
+        { label: '月稼働時間', val: v.hours + '時間' },
+        { label: '時間単価', val: '¥' + v.price.toLocaleString() },
+        { label: '月収', val: '¥' + income.toLocaleString() },
+      ];
+      const sub = `週${Math.round(v.hours/4)}時間ペースの試算`;
+      return { income, rows, sub };
+    },
+  },
+  consul: {
+    emoji: '💬', label: 'TYPE C', name: 'コンサル型',
+    sliders: [
+      { key: 'clients', label: '月クライアント数', min: 1, max: 20, step: 1, default: 3, unit: '人', fmt: v => v + '人' },
+      { key: 'price',   label: '1セッション単価', min: 3000, max: 100000, step: 3000, default: 15000, unit: '円', fmt: v => '¥' + v.toLocaleString() },
+      { key: 'sessions',label: '1クライアントの月セッション数', min: 1, max: 8, step: 1, default: 2, unit: '回', fmt: v => v + '回' },
+    ],
+    calc: (v) => {
+      const income = v.clients * v.price * v.sessions;
+      const rows = [
+        { label: '月クライアント数', val: v.clients + '人' },
+        { label: 'セッション単価', val: '¥' + v.price.toLocaleString() },
+        { label: '月セッション数/人', val: v.sessions + '回' },
+        { label: '月収', val: '¥' + income.toLocaleString() },
+      ];
+      const sub = `月${v.clients * v.sessions}セッションの試算`;
+      return { income, rows, sub };
+    },
+  },
+  kyoiku: {
+    emoji: '📚', label: 'TYPE D', name: '教育型',
+    sliders: [
+      { key: 'price', label: 'コンテンツ単価', min: 300, max: 30000, step: 300, default: 1000, unit: '円', fmt: v => '¥' + v.toLocaleString() },
+      { key: 'sales', label: '月販売数', min: 1, max: 200, step: 1, default: 20, unit: '件', fmt: v => v + '件' },
+    ],
+    calc: (v) => {
+      const income = v.price * v.sales;
+      const rows = [
+        { label: 'コンテンツ単価', val: '¥' + v.price.toLocaleString() },
+        { label: '月販売数', val: v.sales + '件' },
+        { label: '月収', val: '¥' + income.toLocaleString() },
+      ];
+      const sub = `note・Udemyなどの販売想定`;
+      return { income, rows, sub };
+    },
+  },
+  seisaku: {
+    emoji: '🎨', label: 'TYPE E', name: '制作型',
+    sliders: [
+      { key: 'cases', label: '月案件数', min: 1, max: 20, step: 1, default: 3, unit: '件', fmt: v => v + '件' },
+      { key: 'price', label: '案件単価', min: 5000, max: 200000, step: 5000, default: 30000, unit: '円', fmt: v => '¥' + v.toLocaleString() },
+    ],
+    calc: (v) => {
+      const income = v.cases * v.price;
+      const rows = [
+        { label: '月案件数', val: v.cases + '件' },
+        { label: '案件単価', val: '¥' + v.price.toLocaleString() },
+        { label: '月収', val: '¥' + income.toLocaleString() },
+      ];
+      const sub = `デザイン・動画・イラスト等の想定`;
+      return { income, rows, sub };
+    },
+  },
+  shikumi: {
+    emoji: '⚙️', label: 'TYPE F', name: '仕組み型',
+    sliders: [
+      { key: 'pv',    label: '月間アクセス数（PV）', min: 100, max: 100000, step: 100, default: 3000, unit: 'PV', fmt: v => v.toLocaleString() + 'PV' },
+      { key: 'cvr',   label: '転換率（CVR）※目安：アフィリ0.5〜2%・自社商品1〜5%', min: 0.1, max: 10, step: 0.1, default: 1.0, unit: '%', fmt: v => Number(v).toFixed(1) + '%' },
+      { key: 'price', label: '商品単価', min: 500, max: 50000, step: 500, default: 2000, unit: '円', fmt: v => '¥' + v.toLocaleString() },
+    ],
+    calc: (v) => {
+      const sales = Math.floor(v.pv * (v.cvr / 100));
+      const income = sales * v.price;
+      const rows = [
+        { label: '月間PV', val: v.pv.toLocaleString() + 'PV' },
+        { label: 'CVR', val: Number(v.cvr).toFixed(1) + '%' },
+        { label: '月販売数', val: sales + '件' },
+        { label: '商品単価', val: '¥' + v.price.toLocaleString() },
+        { label: '月収', val: '¥' + income.toLocaleString() },
+      ];
+      const sub = `アフィリエイト・ツール販売等の想定`;
+      return { income, rows, sub };
+    },
+  },
+};
+
+const typeOrder = ['hasshin', 'shokunin', 'consul', 'kyoiku', 'seisaku', 'shikumi'];
+let currentType = null;
+let sliderValues = {};
+
+// タイプ選択画面を描画
+function renderTypeSelect() {
+  const grid = document.getElementById('type-grid');
+  grid.innerHTML = '';
+  typeOrder.forEach(key => {
+    const t = types[key];
+    const btn = document.createElement('button');
+    btn.className = 'type-btn';
+    btn.innerHTML = `<span class="t-emoji">${t.emoji}</span>${t.name}`;
+    btn.onclick = () => selectType(key);
+    grid.appendChild(btn);
+  });
+}
+
+function showTypeSelect() {
+  document.getElementById('type-select').style.display = 'block';
+  document.getElementById('simulator').style.display = 'none';
+  history.replaceState(null, '', location.pathname);
+}
+
+function selectType(key) {
+  currentType = key;
+  sliderValues = {};
+  types[key].sliders.forEach(s => { sliderValues[s.key] = s.default; });
+
+  document.getElementById('type-select').style.display = 'none';
+  document.getElementById('simulator').style.display = 'block';
+
+  const t = types[key];
+  document.getElementById('sim-emoji').textContent = t.emoji;
+  document.getElementById('sim-label').textContent = t.label;
+  document.getElementById('sim-name').textContent = t.name;
+
+  renderSliders(key);
+  updateResult();
+  updateURL();
+}
+
+function renderSliders(key) {
+  const t = types[key];
+  const card = document.getElementById('slider-card');
+  card.innerHTML = '';
+  t.sliders.forEach(s => {
+    const row = document.createElement('div');
+    row.className = 'slider-row';
+    row.innerHTML = `
+      <div class="slider-label">
+        <span>${s.label}</span>
+        <span class="slider-val" id="val-${s.key}">${s.fmt(s.default)}</span>
+      </div>
+      <input type="range" min="${s.min}" max="${s.max}" step="${s.step}" value="${s.default}"
+        oninput="onSlider('${s.key}', this.value)">
+    `;
+    card.appendChild(row);
+  });
+}
+
+function onSlider(key, val) {
+  const t = types[currentType];
+  const s = t.sliders.find(x => x.key === key);
+  const numVal = Number(val);
+  sliderValues[key] = numVal;
+  document.getElementById('val-' + key).textContent = s.fmt(numVal);
+  updateResult();
+  updateURL();
+}
+
+function updateResult() {
+  const t = types[currentType];
+  const { income, rows, sub } = t.calc(sliderValues);
+  document.getElementById('result-amount').textContent = '¥' + income.toLocaleString();
+  document.getElementById('result-sub').textContent = sub;
+
+  const bd = document.getElementById('breakdown');
+  bd.innerHTML = '<div class="breakdown-title">計算の内訳</div>';
+  rows.forEach(r => {
+    const div = document.createElement('div');
+    div.className = 'bd-row';
+    div.innerHTML = `<span>${r.label}</span><span class="bd-val">${r.val}</span>`;
+    bd.appendChild(div);
+  });
+}
+
+function updateURL() {
+  const params = new URLSearchParams({ type: currentType });
+  Object.entries(sliderValues).forEach(([k, v]) => params.set(k, v));
+  history.replaceState(null, '', `?${params.toString()}`);
+
+  const t = types[currentType];
+  const { income } = t.calc(sliderValues);
+  const tweetText = `副業収益シミュレーター（${t.name}）でやってみた。\n月収目安：¥${income.toLocaleString()}\n${t.emoji}${t.name}向けの計算式です。\n#副業 #ClaudeCode`;
+  document.getElementById('share-btn').onclick = () => {
+    const url = `${location.origin}${location.pathname}?${params.toString()}`;
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText + '\n' + url)}`, '_blank');
+  };
+}
+
+// 初期化
+renderTypeSelect();
+
+// URLパラメータから復元
+const params = new URLSearchParams(location.search);
+const typeParam = params.get('type');
+if (typeParam && types[typeParam]) {
+  types[typeParam].sliders.forEach(s => {
+    const v = params.get(s.key);
+    if (v !== null) sliderValues[s.key] = Number(v);
+    else sliderValues[s.key] = s.default;
+  });
+  currentType = typeParam;
+
+  document.getElementById('type-select').style.display = 'none';
+  document.getElementById('simulator').style.display = 'block';
+
+  const t = types[typeParam];
+  document.getElementById('sim-emoji').textContent = t.emoji;
+  document.getElementById('sim-label').textContent = t.label;
+  document.getElementById('sim-name').textContent = t.name;
+
+  // スライダーのvalue復元
+  renderSliders(typeParam);
+  types[typeParam].sliders.forEach(s => {
+    const input = document.querySelector(`input[oninput*="${s.key}"]`);
+    if (input) input.value = sliderValues[s.key];
+    const valEl = document.getElementById('val-' + s.key);
+    if (valEl) valEl.textContent = s.fmt(sliderValues[s.key]);
+  });
+  updateResult();
+}
+</script>
+</body>
+</html>

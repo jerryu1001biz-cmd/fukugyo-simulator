@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>副業チャレンジ宣言｜みんなの宣言を見る</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0a0f1e;
+      color: #e8eaf6;
+      font-family: 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+      min-height: 100vh;
+      padding: 24px 16px 48px;
+    }
+    .container { width: 100%; max-width: 480px; margin: 0 auto; }
+
+    .header { text-align: center; margin-bottom: 28px; }
+    .badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #7c3aed, #db2777);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+    }
+    .header h1 { font-size: 20px; font-weight: 800; color: #fff; line-height: 1.4; }
+    .header p { color: #8892b0; font-size: 13px; margin-top: 6px; }
+
+    /* フォーム */
+    .form-card {
+      background: #131929;
+      border: 1px solid #1e2a45;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    .form-title { font-size: 14px; font-weight: 800; color: #fff; margin-bottom: 16px; }
+    .field { margin-bottom: 16px; }
+    .field label { display: block; font-size: 12px; color: #8892b0; font-weight: 700; margin-bottom: 6px; letter-spacing: 0.05em; }
+    .field input, .field select, .field textarea {
+      width: 100%;
+      background: #0d1433;
+      border: 1px solid #1e2a45;
+      color: #e8eaf6;
+      font-size: 14px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      outline: none;
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus { border-color: #7c3aed; }
+    .field textarea { resize: none; height: 80px; line-height: 1.5; }
+    .field select option { background: #0d1433; }
+
+    .submit-btn {
+      display: block; width: 100%;
+      background: linear-gradient(135deg, #7c3aed, #db2777);
+      color: #fff; font-size: 15px; font-weight: 800;
+      padding: 16px; border-radius: 12px; border: none;
+      cursor: pointer; transition: opacity 0.2s;
+    }
+    .submit-btn:hover { opacity: 0.85; }
+    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* 宣言カード（完了後） */
+    #done-section { display: none; }
+    .declaration-card {
+      background: linear-gradient(135deg, #1a0f2e, #2d1040);
+      border: 2px solid #7c3aed;
+      border-radius: 20px;
+      padding: 28px 24px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    .decl-date { font-size: 11px; color: #8892b0; margin-bottom: 12px; }
+    .decl-name { font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 6px; }
+    .decl-type { font-size: 13px; color: #c084fc; margin-bottom: 16px; }
+    .decl-goal {
+      background: #0d1433;
+      border: 1px solid #4c1d95;
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+    .decl-deadline { font-size: 13px; color: #8892b0; }
+    .decl-deadline span { color: #db2777; font-weight: 700; }
+
+    .share-btn {
+      display: block; width: 100%;
+      background: #1d9bf0; color: #fff;
+      font-size: 15px; font-weight: 800;
+      padding: 16px; border-radius: 12px; border: none;
+      cursor: pointer; margin-bottom: 12px; transition: opacity 0.2s;
+    }
+    .share-btn:hover { opacity: 0.85; }
+
+    .back-btn {
+      display: block; width: 100%;
+      background: transparent; color: #8892b0;
+      font-size: 14px; font-weight: 600;
+      padding: 12px; border-radius: 12px;
+      border: 1px solid #1e2a45; cursor: pointer;
+      margin-bottom: 20px; transition: all 0.2s;
+    }
+    .back-btn:hover { color: #fff; border-color: #7c3aed; }
+
+    /* みんなの宣言 */
+    .list-title {
+      font-size: 13px; color: #8892b0; font-weight: 700;
+      letter-spacing: 0.08em; margin-bottom: 12px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .list-count { color: #7c3aed; }
+    .decl-item {
+      background: #131929;
+      border: 1px solid #1e2a45;
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+    }
+    .decl-item-header { display: flex; justify-content: space-between; margin-bottom: 6px; }
+    .decl-item-name { font-size: 13px; font-weight: 700; color: #c8cef0; }
+    .decl-item-type { font-size: 11px; color: #7c3aed; }
+    .decl-item-goal { font-size: 14px; color: #fff; font-weight: 600; margin-bottom: 4px; line-height: 1.4; }
+    .decl-item-deadline { font-size: 11px; color: #8892b0; }
+    .decl-item-deadline span { color: #db2777; }
+
+    .empty { text-align: center; color: #8892b0; font-size: 13px; padding: 24px 0; }
+
+    .link-card {
+      background: #131929; border: 1px solid #1e2a45;
+      border-radius: 12px; padding: 14px 16px;
+      font-size: 13px; color: #8892b0; text-align: center; margin-top: 16px;
+    }
+    .link-card a { color: #7c3aed; font-weight: 700; text-decoration: none; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="badge">CHALLENGE</div>
+    <h1>副業チャレンジ宣言</h1>
+    <p>目標を宣言して、みんなに見てもらおう</p>
+  </div>
+
+  <!-- 入力フォーム -->
+  <div id="form-section">
+    <div class="form-card">
+      <div class="form-title">🔥 宣言する</div>
+
+      <div class="field">
+        <label>ニックネーム（Xのアカウント名など）</label>
+        <input type="text" id="nickname" placeholder="例：ハル｜AI副業の実験記録" maxlength="30" />
+      </div>
+
+      <div class="field">
+        <label>副業タイプ</label>
+        <select id="type">
+          <option value="">選択してください</option>
+          <option value="🔥発信者型">🔥 発信者型</option>
+          <option value="🔧職人型">🔧 職人型</option>
+          <option value="💬コンサル型">💬 コンサル型</option>
+          <option value="📚教育型">📚 教育型</option>
+          <option value="🎨制作型">🎨 制作型</option>
+          <option value="⚙️仕組み型">⚙️ 仕組み型</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>目標（何を達成する？）</label>
+        <textarea id="goal" placeholder="例：毎日1投稿を続けてフォロワー100人を達成する"></textarea>
+      </div>
+
+      <div class="field">
+        <label>期限</label>
+        <input type="text" id="deadline" placeholder="例：2026年6月末" maxlength="20" />
+      </div>
+
+      <button class="submit-btn" id="submit-btn" onclick="declare()">宣言する 🚀</button>
+    </div>
+
+    <!-- みんなの宣言一覧 -->
+    <div class="list-title">
+      <span>みんなの宣言</span>
+      <span class="list-count" id="list-count"></span>
+    </div>
+    <div id="challenge-list"><div class="empty">まだ宣言がありません。最初の一人になろう！</div></div>
+
+    <div class="link-card">
+      自分のタイプがわからない → <a href="./type-match.html">副業タイプ相性診断</a>
+    </div>
+  </div>
+
+  <!-- 宣言完了 -->
+  <div id="done-section">
+    <div class="declaration-card" id="decl-card">
+      <div class="decl-date" id="decl-date"></div>
+      <div class="decl-name" id="decl-name"></div>
+      <div class="decl-type" id="decl-type"></div>
+      <div class="decl-goal" id="decl-goal"></div>
+      <div class="decl-deadline">期限：<span id="decl-deadline"></span></div>
+    </div>
+
+    <button class="share-btn" id="share-btn">𝕏 宣言をシェアする</button>
+    <button class="back-btn" onclick="backToList()">← 一覧に戻る</button>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://udqmvhuhrdkuqppvrodn.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_49adCp-DwNYafQDl7NzS9w_koDBqhDz';
+
+const headers = {
+  'apikey': SUPABASE_KEY,
+  'Authorization': `Bearer ${SUPABASE_KEY}`,
+  'Content-Type': 'application/json',
+  'Prefer': 'return=representation',
+};
+
+async function declare() {
+  const nickname = document.getElementById('nickname').value.trim();
+  const type = document.getElementById('type').value;
+  const goal = document.getElementById('goal').value.trim();
+  const deadline = document.getElementById('deadline').value.trim();
+
+  if (!nickname || !type || !goal || !deadline) {
+    alert('すべての項目を入力してください');
+    return;
+  }
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = '送信中...';
+
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/challenges`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ nickname, type, goal, deadline }),
+  });
+
+  if (!res.ok) {
+    alert('エラーが発生しました。もう一度試してください。');
+    btn.disabled = false;
+    btn.textContent = '宣言する 🚀';
+    return;
+  }
+
+  const [data] = await res.json();
+  showDone(data);
+}
+
+function showDone(data) {
+  document.getElementById('form-section').style.display = 'none';
+  document.getElementById('done-section').style.display = 'block';
+
+  const d = new Date(data.created_at);
+  document.getElementById('decl-date').textContent = `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日 宣言`;
+  document.getElementById('decl-name').textContent = data.nickname;
+  document.getElementById('decl-type').textContent = data.type;
+  document.getElementById('decl-goal').textContent = data.goal;
+  document.getElementById('decl-deadline').textContent = data.deadline;
+
+  const url = `${location.origin}${location.pathname}?id=${data.id}`;
+  document.getElementById('share-btn').onclick = () => {
+    const text = encodeURIComponent(`副業チャレンジを宣言しました💪\n\n「${data.goal}」\n期限：${data.deadline}\n\n${url}\n\n#副業 #副業初心者`);
+    window.open(`https://twitter.com/intent/tweet?text=${text}`, '_blank');
+  };
+
+  history.replaceState(null, '', `?id=${data.id}`);
+}
+
+function backToList() {
+  document.getElementById('done-section').style.display = 'none';
+  document.getElementById('form-section').style.display = 'block';
+  history.replaceState(null, '', location.pathname);
+  loadList();
+}
+
+async function loadList() {
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/challenges?order=created_at.desc&limit=20`,
+    { headers }
+  );
+  const data = await res.json();
+  const el = document.getElementById('challenge-list');
+  document.getElementById('list-count').textContent = data.length + '件';
+
+  if (!data.length) {
+    el.innerHTML = '<div class="empty">まだ宣言がありません。最初の一人になろう！</div>';
+    return;
+  }
+
+  el.innerHTML = data.map(d => {
+    const date = new Date(d.created_at);
+    const dateStr = `${date.getMonth()+1}/${date.getDate()}`;
+    return `
+      <div class="decl-item">
+        <div class="decl-item-header">
+          <span class="decl-item-name">${esc(d.nickname)}</span>
+          <span class="decl-item-type">${esc(d.type)}</span>
+        </div>
+        <div class="decl-item-goal">${esc(d.goal)}</div>
+        <div class="decl-item-deadline">期限：<span>${esc(d.deadline)}</span>｜${dateStr}宣言</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function esc(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// URLパラメータで特定の宣言を表示
+async function loadById(id) {
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/challenges?id=eq.${id}&limit=1`,
+    { headers }
+  );
+  const data = await res.json();
+  if (data.length) showDone(data[0]);
+  else loadList();
+}
+
+const params = new URLSearchParams(location.search);
+const id = params.get('id');
+if (id) {
+  loadById(id);
+} else {
+  loadList();
+}
+</script>
+</body>
+</html>

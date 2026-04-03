@@ -185,6 +185,11 @@
         <input type="text" id="deadline" placeholder="例：2026年6月末" maxlength="20" />
       </div>
 
+      <div class="field">
+        <label>削除コード（4桁の数字）※後で削除するときに使います</label>
+        <input type="number" id="pin" placeholder="例：1234" maxlength="4" min="0" max="9999" />
+      </div>
+
       <button class="submit-btn" id="submit-btn" onclick="declare()">宣言する 🚀</button>
     </div>
 
@@ -233,8 +238,13 @@ async function declare() {
   const goal = document.getElementById('goal').value.trim();
   const deadline = document.getElementById('deadline').value.trim();
 
-  if (!nickname || !type || !goal || !deadline) {
+  const pin = String(document.getElementById('pin').value).trim();
+  if (!nickname || !type || !goal || !deadline || !pin) {
     alert('すべての項目を入力してください');
+    return;
+  }
+  if (!/^\d{4}$/.test(pin)) {
+    alert('削除コードは4桁の数字で入力してください');
     return;
   }
 
@@ -245,7 +255,7 @@ async function declare() {
   const res = await fetch(`${SUPABASE_URL}/rest/v1/challenges`, {
     method: 'POST',
     headers,
-    body: JSON.stringify({ nickname, type, goal, deadline }),
+    body: JSON.stringify({ nickname, type, goal, deadline, pin }),
   });
 
   if (!res.ok) {
@@ -274,13 +284,10 @@ function showDone(data) {
   document.getElementById('decl-goal').textContent = data.goal;
   document.getElementById('decl-deadline').textContent = data.deadline;
 
-  // 自分の宣言なら削除ボタンを表示
-  const myIds = JSON.parse(localStorage.getItem('my_challenges') || '[]');
-  if (myIds.includes(data.id)) {
-    const delBtn = document.getElementById('delete-btn');
-    delBtn.style.display = 'block';
-    delBtn.dataset.id = data.id;
-  }
+  // 削除ボタンを常に表示（PIN認証で保護）
+  const delBtn = document.getElementById('delete-btn');
+  delBtn.style.display = 'block';
+  delBtn.dataset.id = data.id;
 
   const url = `${location.origin}${location.pathname}?id=${data.id}`;
   document.getElementById('share-btn').onclick = () => {
@@ -292,13 +299,19 @@ function showDone(data) {
 }
 
 async function deleteDecl() {
-  if (!confirm('この宣言を削除しますか？')) return;
   const id = document.getElementById('delete-btn').dataset.id;
-  await fetch(`${SUPABASE_URL}/rest/v1/challenges?id=eq.${id}`, {
-    method: 'DELETE',
-    headers,
-  });
-  // LocalStorageからも削除
+  const inputPin = prompt('削除コード（4桁）を入力してください');
+  if (!inputPin) return;
+
+  // PINを検証
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/challenges?id=eq.${id}&pin=eq.${inputPin}&select=id`, { headers });
+  const data = await res.json();
+  if (!data.length) {
+    alert('削除コードが違います');
+    return;
+  }
+
+  await fetch(`${SUPABASE_URL}/rest/v1/challenges?id=eq.${id}`, { method: 'DELETE', headers });
   const myIds = JSON.parse(localStorage.getItem('my_challenges') || '[]');
   localStorage.setItem('my_challenges', JSON.stringify(myIds.filter(i => i !== id)));
   backToList();

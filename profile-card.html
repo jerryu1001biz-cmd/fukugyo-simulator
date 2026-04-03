@@ -268,11 +268,10 @@ function initFromParams() {
 }
 
 function goToStage() {
-  const back = encodeURIComponent(location.href.split('?')[0] + (currentType ? `?type=${currentType}` : ''));
-  location.href = `./stage-check.html`;
+  location.href = `./stage-check.html?return=profile`;
 }
 function goToType() {
-  location.href = `./type-match.html`;
+  location.href = `./type-match.html?return=profile`;
 }
 
 async function createCard() {

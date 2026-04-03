@@ -374,6 +374,11 @@ function showResult() {
   // URLにステージを反映
   history.replaceState(null, '', `?stage=${idx + 1}`);
   localStorage.setItem('diag_stage', `stage${idx + 1}`);
+  const returnTo = new URLSearchParams(location.search).get('return');
+  if (returnTo === 'profile') {
+    setTimeout(() => { location.href = './profile-card.html'; }, 1500);
+    return;
+  }
   const pb = document.getElementById('profile-btn');
   if (pb) { pb.style.display = 'block'; pb.dataset.stage = idx + 1; }
 

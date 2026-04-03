@@ -435,7 +435,14 @@ function showResult(fromURL) {
   };
 
   history.replaceState(null, '', `?type=${topKey}`);
-  if (!fromURL) localStorage.setItem('diag_type', topKey);
+  if (!fromURL) {
+    localStorage.setItem('diag_type', topKey);
+    const returnTo = new URLSearchParams(location.search).get('return');
+    if (returnTo === 'profile') {
+      setTimeout(() => { location.href = './profile-card.html'; }, 1500);
+      return;
+    }
+  }
   const pb = document.getElementById('profile-btn');
   if (pb) { pb.style.display = 'block'; pb.dataset.type = topKey; }
 
